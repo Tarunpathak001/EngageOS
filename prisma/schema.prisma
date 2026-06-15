@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id                Int                @id @default(autoincrement())
+  name              String
+  email             String             @unique
+  phone             String?
+  city              String?
+  totalSpend        Float              @default(0)
+  createdAt         DateTime           @default(now())
+  communicationLogs CommunicationLog[]
+  orders            Order[]
+}
+
+model Order {
+  id         Int      @id @default(autoincrement())
+  amount     Float
+  orderDate  DateTime @default(now())
+  customerId Int
+  customer   Customer @relation(fields: [customerId], references: [id])
+}
+
+model Campaign {
+
+  id                Int      @id @default(autoincrement())
+
+  name              String
+
+  message           String
+
+  createdAt         DateTime @default(now())
+
+  scheduledAt       DateTime?
+
+  status            String   @default("DRAFT")
+
+  userId            Int?
+
+  channel           String   @default("EMAIL")
+
+  user              User? @relation(fields:[userId], references:[id])
+
+  communicationLogs CommunicationLog[]
+}
+
+model CommunicationLog {
+  id         Int      @id @default(autoincrement())
+  campaignId Int
+  customerId Int
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  customer   Customer @relation(fields: [customerId], references: [id])
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  name       String
+  email      String     @unique
+  password   String
+  createdAt  DateTime   @default(now())
+  isVerified Boolean    @default(false)
+  campaigns  Campaign[]
+}
+
+model OTP {
+  id        Int      @id @default(autoincrement())
+  email     String
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

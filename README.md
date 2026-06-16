@@ -29,7 +29,8 @@ Rohan completes the entire task in **under 2 minutes** without writing a single 
 
 ## 🚀 Project Gist
 
-EngageOS is an AI-powered customer intelligence and marketing automation platform. It allows businesses to send marketing messages (email, SMS, WhatsApp) to their customers using plain English goals (e.g. *"Send a weekend discount offer to all VIP customers living in Delhi"*).
+EngageOS is an AI-powered customer intelligence and marketing automation platform. It allows businesses to send marketing messages (email) to their customers using plain English goals (e.g. *"Send a weekend discount offer to all VIP customers living in Delhi"*).
+It currently supports email campaign delivery and provides an extensible channel architecture for future integrations such as Telegram, SMS, and WhatsApp.
 
 The platform comprises three primary packages:
 1. **Core Backend (Port 5000):** Manages CRM records, campaigns, dashboard statistics, session authentication, and hosts the autonomous AI Marketing Agent. Connects directly to PostgreSQL and Redis.

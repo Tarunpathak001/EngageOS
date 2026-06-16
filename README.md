@@ -166,7 +166,11 @@ Here is a step-by-step story of what happens when someone uses my EngageOS:
 ## 📊 Visual Workflow Flowcharts
 
 ### 1. Backend Asynchronous Campaign Processing Workflow
-This sequence flowchart shows how campaign processing and tracking data flows through the system when a goal is submitted:
+
+To ensure the diagram is fully readable and doesn't render too small due to horizontal spacing, it has been split into two logical phases:
+
+#### A. Campaign Planning & Queueing (Synchronous Phase)
+This diagram illustrates the synchronous process when a marketer enters a campaign goal, which is parsed by Gemini AI to run target queries and enqueue tasks.
 
 ```mermaid
 sequenceDiagram
@@ -176,9 +180,6 @@ sequenceDiagram
     participant Gemini as Google Gemini AI
     participant DB as PostgreSQL Database
     participant Redis as Redis Queue (BullMQ)
-    participant Worker as Campaign Worker
-    participant Channel as Channel Service (Port 6000)
-    actor Cust as End Customer
 
     User->>Backend: Enters Goal (e.g. "Target VIP in Delhi")
     Backend->>Gemini: Send prompt to identify filters
@@ -190,16 +191,29 @@ sequenceDiagram
     Backend->>DB: Save new Campaign as "DRAFT"
     Backend->>Redis: Queue sending task for each customer
     Backend-->>User: Show success message with customer count
-    
+```
+
+#### B. Campaign Dispatching & Tracking (Asynchronous Phase)
+This diagram represents the background queue worker processing each campaign task and sending messages via the Channel Service, followed by webhooks/pixel redirects that track customer clicks and opens.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Redis as Redis Queue (BullMQ)
+    participant Worker as Campaign Worker
+    participant Channel as Channel Service (Port 6000)
+    actor Cust as End Customer
+    participant Backend as Core CRM Backend (Port 5000)
+    participant DB as PostgreSQL Database
+
     Note over Worker, Redis: Asynchronous Sending Process
-    
     Worker->>Redis: Pick up next sending task
     Worker->>Channel: Send data (customer details + message)
     Channel->>Cust: Send Email with tracking pixel and CTA link
     Channel->>Backend: Send receipt webhook (Set status to "DELIVERED")
+    Backend->>DB: Update database log to "DELIVERED"
     
     Note over Cust, Backend: Tracking Opens & Clicks
-    
     Cust->>Backend: Opens email (loads hidden 1x1 image /tracking/open/:id)
     Backend->>DB: Update database log to "OPENED"
     Cust->>Backend: Clicks email link (/tracking/click/:id)

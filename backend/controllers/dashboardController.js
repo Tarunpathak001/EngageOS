@@ -2,7 +2,7 @@
 const prisma =
   require("../prisma/prismaClient");
 
-  const {
+const {
   generateCampaignRecommendation,
 } = require(
   "../services/aiService"
@@ -11,7 +11,7 @@ const prisma =
 const getDashboardStats =
   async (req, res) => {
 
-console.time("dashboard");
+    console.time("dashboard");
 
     try {
 
@@ -24,47 +24,47 @@ console.time("dashboard");
       const totalMessages =
         await prisma.communicationLog.count();
 
-const delivered =
-  await prisma.communicationLog.count({
+      const delivered =
+        await prisma.communicationLog.count({
 
-    where:{
+          where: {
 
-      status:{
-        in:[
-          "DELIVERED",
-          "OPENED",
-          "CLICKED"
-        ]
-      }
+            status: {
+              in: [
+                "DELIVERED",
+                "OPENED",
+                "CLICKED"
+              ]
+            }
 
-    }
+          }
 
-  });
+        });
 
-const opened =
-  await prisma.communicationLog.count({
+      const opened =
+        await prisma.communicationLog.count({
 
-    where:{
+          where: {
 
-      status:{
-        in:[
-          "OPENED",
-          "CLICKED"
-        ]
-      }
+            status: {
+              in: [
+                "OPENED",
+                "CLICKED"
+              ]
+            }
 
-    }
+          }
 
-  });
+        });
 
-const clicked =
-  await prisma.communicationLog.count({
+      const clicked =
+        await prisma.communicationLog.count({
 
-    where:{
-      status:"CLICKED"
-    }
+          where: {
+            status: "CLICKED"
+          }
 
-  });
+        });
 
       const failed =
         await prisma.communicationLog.count({
@@ -84,25 +84,25 @@ const clicked =
         delivered === 0
           ? 0
           : (
-              (opened / delivered) *
-              100
-            ).toFixed(2);
+            (opened / delivered) *
+            100
+          ).toFixed(2);
 
       const ctr =
         opened === 0
           ? 0
           : (
-              (clicked / opened) *
-              100
-            ).toFixed(2);
+            (clicked / opened) *
+            100
+          ).toFixed(2);
 
-            console.log({
-  delivered,
-  opened,
-  clicked,
-  failed,
-  pending
-});
+      console.log({
+        delivered,
+        opened,
+        clicked,
+        failed,
+        pending
+      });
 
       res.status(200).json({
 
@@ -135,56 +135,56 @@ const clicked =
       });
 
     }
-console.timeEnd("dashboard");
+    console.timeEnd("dashboard");
 
-};
+  };
 
 const getAIRecommendation =
   async (req, res) => {
 
     try {
 
-const delivered =
-  await prisma.communicationLog.count({
+      const delivered =
+        await prisma.communicationLog.count({
 
-    where:{
+          where: {
 
-      status:{
-        in:[
-          "DELIVERED",
-          "OPENED",
-          "CLICKED"
-        ]
-      }
+            status: {
+              in: [
+                "DELIVERED",
+                "OPENED",
+                "CLICKED"
+              ]
+            }
 
-    }
+          }
 
-  });
+        });
 
-const opened =
-  await prisma.communicationLog.count({
+      const opened =
+        await prisma.communicationLog.count({
 
-    where:{
+          where: {
 
-      status:{
-        in:[
-          "OPENED",
-          "CLICKED"
-        ]
-      }
+            status: {
+              in: [
+                "OPENED",
+                "CLICKED"
+              ]
+            }
 
-    }
+          }
 
-  });
+        });
 
-const clicked =
-  await prisma.communicationLog.count({
+      const clicked =
+        await prisma.communicationLog.count({
 
-    where:{
-      status:"CLICKED"
-    }
+          where: {
+            status: "CLICKED"
+          }
 
-  });
+        });
 
       const failed =
         await prisma.communicationLog.count({
@@ -197,7 +197,11 @@ const clicked =
         await prisma.customer.count();
 
       const campaigns =
-        await prisma.campaign.count();
+        await prisma.campaign.count({
+          where: {
+            userId: req.user.id
+          }
+        })
 
       const recommendation =
         await generateCampaignRecommendation({
@@ -229,118 +233,118 @@ const clicked =
 
     }
 
-};
+  };
 
 const getDashboardAnalytics =
-async (req,res)=>{
+  async (req, res) => {
 
-  try{
+    try {
 
-    const logs =
-      await prisma.communicationLog.findMany({
+      const logs =
+        await prisma.communicationLog.findMany({
 
-        orderBy:{
-          createdAt:"asc"
+          orderBy: {
+            createdAt: "asc"
+          }
+
+        });
+
+      const analyticsMap = {};
+
+      logs.forEach((log) => {
+
+        const date =
+          new Date(
+            log.createdAt
+          ).toLocaleDateString();
+
+        if (!analyticsMap[date]) {
+
+          analyticsMap[date] = {
+
+            date,
+
+            delivered: 0,
+
+            opened: 0,
+
+            clicked: 0,
+
+            failed: 0
+
+          };
+
+        }
+
+        switch (log.status) {
+
+          case "DELIVERED":
+
+            analyticsMap[
+              date
+            ].delivered++;
+
+            break;
+
+          case "OPENED":
+
+            analyticsMap[
+              date
+            ].delivered++;
+
+            analyticsMap[
+              date
+            ].opened++;
+
+            break;
+
+          case "CLICKED":
+
+            analyticsMap[
+              date
+            ].delivered++;
+
+            analyticsMap[
+              date
+            ].opened++;
+
+            analyticsMap[
+              date
+            ].clicked++;
+
+            break;
+
+          case "FAILED":
+
+            analyticsMap[
+              date
+            ].failed++;
+
+            break;
+
         }
 
       });
 
-    const analyticsMap = {};
+      const analytics =
+        Object.values(
+          analyticsMap
+        );
 
-logs.forEach((log) => {
-
-  const date =
-    new Date(
-      log.createdAt
-    ).toLocaleDateString();
-
-  if (!analyticsMap[date]) {
-
-    analyticsMap[date] = {
-
-      date,
-
-      delivered: 0,
-
-      opened: 0,
-
-      clicked: 0,
-
-      failed: 0
-
-    };
-
-  }
-
-  switch (log.status) {
-
-    case "DELIVERED":
-
-      analyticsMap[
-        date
-      ].delivered++;
-
-      break;
-
-    case "OPENED":
-
-      analyticsMap[
-        date
-      ].delivered++;
-
-      analyticsMap[
-        date
-      ].opened++;
-
-      break;
-
-    case "CLICKED":
-
-      analyticsMap[
-        date
-      ].delivered++;
-
-      analyticsMap[
-        date
-      ].opened++;
-
-      analyticsMap[
-        date
-      ].clicked++;
-
-      break;
-
-    case "FAILED":
-
-      analyticsMap[
-        date
-      ].failed++;
-
-      break;
-
-  }
-
-});
-
-    const analytics =
-      Object.values(
-        analyticsMap
+      res.json(
+        analytics
       );
 
-    res.json(
-      analytics
-    );
+    }
+    catch (error) {
 
-  }
-  catch(error){
+      res.status(500).json({
+        message: error.message
+      });
 
-    res.status(500).json({
-      message:error.message
-    });
+    }
 
-  }
-
-};
+  };
 
 module.exports = {
   getDashboardStats,

@@ -1,18 +1,27 @@
-# Dependency directories
+# Monorepo Dependency directories
 node_modules/
+backend/node_modules/
+backend/channel-service/node_modules/
+frontend/node_modules/
 jspm_packages/
 web_modules/
 
-# Environment files
+# Environment configurations
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 *.env
+backend/.env
+backend/channel-service/.env
+frontend/.env
 
 # Prisma database and schema generator caches
 .prisma/
+backend/.prisma/
+backend/prisma/*.db
+backend/prisma/*.db-journal
 
 # Log files
 npm-debug.log*
@@ -28,3 +37,4 @@ Thumbs.db
 
 # Temporary and workspace dump files
 structure.txt
+backend/structure.txt

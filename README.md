@@ -74,35 +74,38 @@ I split this project into two main folders: the main folder (CRM backend) and a 
 
 ```
 EngageOS/
-├── channel-service/          # Small service on Port 6000 that sends emails & mock messages
-│   ├── controllers/          # Chooses if message is Email, SMS, or WhatsApp
-│   ├── routes/               # Links incoming commands to the controller
-│   ├── services/             # Sends emails using Nodemailer/Gmail SMTP
-│   ├── server.js             # Starts the channel service
-│   └── package.json          # Node libraries for the channel service
-├── controllers/              # Code files that run different features
-│   ├── agentController.js    # AI Agent code (calls Gemini AI, filters customers)
-│   ├── campaignController.js # Creates, schedules, and shows stats of campaigns
-│   ├── customerController.js # Code to add customers and view orders
-│   ├── authController.js     # User registration, logins, and OTP code verification
-│   └── trackingController.js # Handles click tracking redirects and invisible open pixels
-├── middleware/               # Security checkers
-│   └── authMiddleware.js     # Checks if user is logged in before letting them see pages
-├── prisma/                   # Database files
-│   ├── schema.prisma         # List of tables (Customer, Order, User, OTP, Campaign)
-│   └── prismaClient.js       # Reusable database connector code
-├── queues/                   # Queues list
-│   └── campaignQueue.js      # The queue code connecting to Redis
-├── routes/                   # File paths mapping requests to controllers
-├── services/                 # Helper services
-│   ├── aiService.js          # The code that prompts and talks to Gemini AI
-│   └── audienceService.js    # Code that makes filters (like city = Delhi)
-├── workers/                  # Background engines that run forever
-│   ├── campaignWorker.js     # Takes emails from Redis queue and hands them to Channel Service
-│   └── schedulerWorker.js    # Checks every 30 seconds if any campaign was scheduled to run later
-├── server.js                 # Main file that starts my server on Port 5000
-├── requirement.py            # Automatic helper script I wrote to set up the project easily
-└── package.json              # List of Node packages for the main app
+├── backend/                  # Monorepo backend folder
+│   ├── channel-service/      # Small service on Port 6000 that sends emails & mock messages
+│   │   ├── controllers/      # Chooses if message is Email, SMS, or WhatsApp
+│   │   ├── routes/           # Links incoming commands to the controller
+│   │   ├── services/         # Sends emails using Nodemailer/Gmail SMTP
+│   │   ├── server.js         # Starts the channel service
+│   │   └── package.json      # Node libraries for the channel service
+│   ├── controllers/          # Code files that run different features
+│   │   ├── agentController.js    # AI Agent code (calls Gemini AI, filters customers)
+│   │   ├── campaignController.js # Creates, schedules, and shows stats of campaigns
+│   │   ├── customerController.js # Code to add customers and view orders
+│   │   ├── authController.js     # User registration, logins, and OTP code verification
+│   │   └── trackingController.js # Handles click tracking redirects and invisible open pixels
+│   ├── middleware/           # Security checkers
+│   │   └── authMiddleware.js # Checks if user is logged in before letting them see pages
+│   ├── prisma/               # Database files
+│   │   ├── schema.prisma     # List of tables (Customer, Order, User, OTP, Campaign)
+│   │   └── prismaClient.js   # Reusable database connector code
+│   ├── queues/               # Queues list
+│   │   └── campaignQueue.js  # The queue code connecting to Redis
+│   ├── routes/               # File paths mapping requests to controllers
+│   ├── services/             # Helper services
+│   │   ├── aiService.js      # The code that prompts and talks to Gemini AI
+│   │   └── audienceService.js # Code that makes filters (like city = Delhi)
+│   ├── workers/              # Background engines that run forever
+│   │   ├── campaignWorker.js # Takes emails from Redis queue and hands them to Channel Service
+│   │   └── schedulerWorker.js # Checks every 30 seconds if any campaign was scheduled to run later
+│   ├── server.js             # Main file that starts my server on Port 5000
+│   ├── requirement.py        # Automatic helper script I wrote to set up the project easily
+│   └── package.json          # List of Node packages for the main app
+├── frontend/                 # Monorepo frontend folder (placeholder)
+└── README.md                 # Project documentation
 ```
 
 ---
@@ -172,43 +175,52 @@ sequenceDiagram
 ## ⚙️ Running Commands & Installation
 
 ### Step 1: Run the Setup Script
-To make setting up easy, I created a Python helper script. It will verify Node.js is on your computer, create template configuration files, and install all required files for both directories automatically.
+To make setting up easy, I created a Python helper script inside the backend directory. It will verify Node.js is on your computer, create template configuration files, and install all required files for both directories automatically.
 
-Run this command in your terminal:
+First, navigate to the `backend/` directory:
+```bash
+cd backend
+```
+
+Then, run the setup script:
 ```bash
 python requirement.py
 ```
 
 ### Step 2: Fill in Credentials
-After running the script, you will see two new files called `.env` (in the root folder) and `channel-service/.env`. Open them and fill in:
+After running the script, you will see two new files called `.env` (in the `backend/` folder) and `channel-service/.env` (in the `backend/channel-service/` folder). Open them and fill in:
 *   `DATABASE_URL`: Link to your PostgreSQL database.
 *   `REDIS_URL`: Link to your running Redis server.
 *   `GEMINI_API_KEY`: Your Google Gemini API Key.
 *   `EMAIL_USER` & `EMAIL_PASS`: Gmail email and app password for sending emails.
 
 ### Step 3: Set up Database Tables
-Run this command to create the tables inside your PostgreSQL database:
+From the `backend/` directory, run this command to create the tables inside your PostgreSQL database:
 ```bash
 npx prisma db push
 ```
 
 ### Step 4: Start All Servers
-Open four separate terminal windows to run all parts of the app:
+Navigate to the `backend/` directory and open separate terminal windows to run all parts of the app:
 
 *   **Terminal 1 (Core CRM Backend API):**
     ```bash
+    cd backend
     npm start
     ```
 *   **Terminal 2 (Channel Delivery Microservice):**
     ```bash
+    cd backend
     npm --prefix channel-service run dev
     ```
 *   **Terminal 3 (Background Campaign Worker):**
     ```bash
+    cd backend
     npm run worker
     ```
 *   **Terminal 4 (Campaign Scheduler):**
     ```bash
+    cd backend
     npm run scheduler
     ```
 

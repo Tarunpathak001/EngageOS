@@ -29,15 +29,12 @@ Rohan completes the entire task in **under 2 minutes** without writing a single 
 
 ## 🚀 Project Gist
 
-EngageOS is a smart tool that I built to help businesses send marketing emails, SMS, and WhatsApp messages to their customers. 
+EngageOS is an AI-powered customer intelligence and marketing automation platform. It allows businesses to send marketing messages (email, SMS, WhatsApp) to their customers using plain English goals (e.g. *"Send a weekend discount offer to all VIP customers living in Delhi"*).
 
-Normally, if you want to send emails to specific customers, you have to write complex database queries. With EngageOS, you can just type a simple goal in plain English, like: *"Send a weekend discount offer to all VIP customers living in Delhi."* 
-
-My system uses **Google Gemini AI** to understand your sentence, find the correct customers, write a catchy email draft, and send it out automatically.
-
-EngageOS is composed of two primary services that I developed:
-1. **Core Backend (Port 5000):** Manages customers, order histories, JWT-based authentication, dashboard analytics, campaign tracking, and hosts the autonomous AI Marketing Agent. It communicates with PostgreSQL and Redis.
-2. **Channel Service (Port 6000):** A separate microservice dedicated to message delivery. It handles outbound SMTP emails via Nodemailer, embeds delivery tracking pixels, tracks link clicks, and simulates SMS/WhatsApp message delivery channels.
+The platform comprises three primary packages:
+1. **Core Backend (Port 5000):** Manages CRM records, campaigns, dashboard statistics, session authentication, and hosts the autonomous AI Marketing Agent. Connects directly to PostgreSQL and Redis.
+2. **Channel Service (Port 6000):** A delivery microservice that routes message requests to Nodemailer SMTP or mock channels, embedding tracking pixels and redirect hooks.
+3. **React Enterprise Frontend (Port 5173):** A professional, responsive dashboard client featuring custom audience builders, AI campaign studio tracking, and chat-style analytics interfaces.
 
 ---
 
@@ -45,68 +42,107 @@ EngageOS is composed of two primary services that I developed:
 
 If you are new to this project, here is what the technical terms mean in simple words:
 
-*   **CRM (Customer Relationship Management):** A system or database used by companies to store information about their customers, like their names, emails, purchases, and cities.
-*   **Google Gemini AI:** A smart AI assistant (like ChatGPT) that reads plain English sentences, picks out search filters, and writes email text.
-*   **Database (PostgreSQL) & Prisma ORM:** PostgreSQL is the storage room where I save all customer details. Prisma is the helper tool that lets my Node.js code talk to the database easily.
-*   **Message Queue (Redis & BullMQ):** If I send 10,000 emails at once, the server might crash. Redis and BullMQ act like a post office. They store the emails in a line (queue) and send them one by one safely in the background.
-*   **Channel Service:** A separate, small app that has only one job: actually delivering the emails (using Gmail SMTP) or pretending to send SMS and WhatsApp messages.
-*   **Tracking Pixel:** A tiny, invisible 1x1 image hidden inside the email. When the customer opens the email, their phone downloads this invisible image from my server. That is how I know they opened it!
-*   **CTR (Click-Through Rate):** The percentage of customers who clicked the link inside my email compared to those who opened it.
+*   **CRM (Customer Relationship Management):** A database used by companies to store information about their customers, like purchases and contact details.
+*   **Google Gemini AI:** A smart AI assistant that parses natural language instructions, derives query filters, and draft emails.
+*   **Database (PostgreSQL) & Prisma ORM:** The storage layers, queried safely via Prisma's schema.
+*   **Message Queue (Redis & BullMQ):** A background worker setup that schedules and processes outbound campaigns without overloading the thread.
+*   **Tracking Pixel:** A transparent 1x1 image embedded in emails to log `OPENED` metrics.
+*   **CTR (Click-Through Rate):** The percentage of users clicking links relative to total opens.
 
 ---
 
 ## 🛠️ Technology Stack (What I Used)
 
-I built this project using these main technologies:
+### Core Backend & Infrastructure
+1. **Node.js & Express.js:** The core backend application runtime.
+2. **PostgreSQL & Prisma ORM:** Database engine and schema client.
+3. **Redis & BullMQ:** Distributed queue system for campaign background task workers.
+4. **Google Gemini AI (`gemini-2.5-flash`):** AI intelligence interface.
+5. **Nodemailer:** Transporter wrapper for SMTP email deliveries.
+6. **bcryptjs & JWT:** User verification, hashing, and token generation.
 
-1.  **Node.js & Express.js:** The main engine and framework used to build my backend servers.
-2.  **PostgreSQL & Prisma:** Used to store and manage tables like Customers, Orders, and Campaigns.
-3.  **Redis & BullMQ:** Used for managing the queue of emails so my server never gets overloaded.
-4.  **Google Gemini AI (`gemini-2.5-flash`):** Used to read plain text goals, select the right customers, and write email copy.
-5.  **Nodemailer:** The library used to log into Gmail SMTP and send the physical emails.
-6.  **bcryptjs & JWT:** Used to secure passwords and let users log in safely.
+### Enterprise Frontend
+1. **React 18 & TypeScript:** Development base for type-safe rendering.
+2. **Vite:** Asset bundling and lightning-fast local development server.
+3. **React Router DOM:** Client-side path routing.
+4. **TanStack Query & Axios:** Server synchronization and authorized HTTP client with JWT interceptors.
+5. **React Hook Form & Zod:** Input validation and schema rules.
+6. **Tailwind CSS & shadcn/ui:** Component design system using clean utility classes and radix-ui primitives.
+7. **Recharts & Lucide React:** Modular charts and visual icons.
 
 ---
 
-## 📂 Project Folder Structure (Where is what?)
+## 📂 Project Folder Structure
 
-I split this project into two main folders: the main folder (CRM backend) and a sub-folder called `channel-service` (delivery service).
+The repository is organized into a monorepo containing backend services and the frontend application:
 
 ```
 EngageOS/
 ├── backend/                  # Monorepo backend folder
-│   ├── channel-service/      # Small service on Port 6000 that sends emails & mock messages
-│   │   ├── controllers/      # Chooses if message is Email, SMS, or WhatsApp
-│   │   ├── routes/           # Links incoming commands to the controller
-│   │   ├── services/         # Sends emails using Nodemailer/Gmail SMTP
-│   │   ├── server.js         # Starts the channel service
-│   │   └── package.json      # Node libraries for the channel service
-│   ├── controllers/          # Code files that run different features
-│   │   ├── agentController.js    # AI Agent code (calls Gemini AI, filters customers)
-│   │   ├── campaignController.js # Creates, schedules, and shows stats of campaigns
-│   │   ├── customerController.js # Code to add customers and view orders
-│   │   ├── authController.js     # User registration, logins, and OTP code verification
-│   │   └── trackingController.js # Handles click tracking redirects and invisible open pixels
-│   ├── middleware/           # Security checkers
-│   │   └── authMiddleware.js # Checks if user is logged in before letting them see pages
-│   ├── prisma/               # Database files
-│   │   ├── schema.prisma     # List of tables (Customer, Order, User, OTP, Campaign)
-│   │   └── prismaClient.js   # Reusable database connector code
-│   ├── queues/               # Queues list
-│   │   └── campaignQueue.js  # The queue code connecting to Redis
-│   ├── routes/               # File paths mapping requests to controllers
-│   ├── services/             # Helper services
-│   │   ├── aiService.js      # The code that prompts and talks to Gemini AI
-│   │   └── audienceService.js # Code that makes filters (like city = Delhi)
-│   ├── workers/              # Background engines that run forever
-│   │   ├── campaignWorker.js # Takes emails from Redis queue and hands them to Channel Service
-│   │   └── schedulerWorker.js # Checks every 30 seconds if any campaign was scheduled to run later
-│   ├── server.js             # Main file that starts my server on Port 5000
-│   ├── requirement.py        # Automatic helper script I wrote to set up the project easily
-│   └── package.json          # List of Node packages for the main app
-├── frontend/                 # Monorepo frontend folder (placeholder)
-└── README.md                 # Project documentation
+│   ├── channel-service/      # Message delivery service on Port 6000
+│   │   ├── controllers/      # Message channel routers (Email, SMS, WhatsApp)
+│   │   ├── routes/           # Channel service express endpoints
+│   │   ├── services/         # Nodemailer SMTP and mock delivery integrations
+│   │   └── package.json      # Dependencies for delivery service
+│   ├── controllers/          # Business logic handlers
+│   │   ├── agentController.js    # AI Marketing Agent (Gemini API integrations)
+│   │   ├── campaignController.js # Campaign CRUD, history, and status trackers
+│   │   ├── customerController.js # Customer registers and order logs
+│   │   ├── authController.js     # User registration, logins, and OTP confirmation
+│   │   └── trackingController.js # Email click redirects and open tracking pixels
+│   ├── middleware/           # Route guards
+│   │   └── authMiddleware.js # JWT validation token checkers
+│   ├── prisma/               # Database management
+│   │   ├── schema.prisma     # Postgres table models
+│   │   └── prismaClient.js   # DB connector client instances
+│   ├── queues/               # Task scheduling queues
+│   │   └── campaignQueue.js  # BullMQ connection client
+│   ├── routes/               # Express endpoints matching routers
+│   ├── services/             # Helper business logic helpers (AI prompt models)
+│   ├── workers/              # Asynchronous background runner engines
+│   │   ├── campaignWorker.js # Queue process dispatch workers
+│   │   └── schedulerWorker.js # Cron scheduled checker workers
+│   ├── server.js             # Main core server entrypoint (Port 5000)
+│   ├── requirement.py        # Automatic backend setup script
+│   └── package.json          # Main package file for backend scripts
+├── frontend/                 # React Enterprise Frontend Dashboard (Port 5173)
+│   ├── src/
+│   │   ├── api/              # API Client hooks (auth, customers, campaigns, agents)
+│   │   ├── components/
+│   │   │   ├── ui/           # Generic shadcn/ui primitives
+│   │   │   ├── layout/       # Frame elements (Sidebar, Header, AppLayout)
+│   │   │   ├── common/       # General-purpose states (Loading, Error, Empty)
+│   │   │   ├── dashboard/    # Metrics widgets and analytics charts
+│   │   │   ├── customers/    # Customer directories and creation forms
+│   │   │   ├── campaigns/    # Campaign configurations and logs list
+│   │   │   └── ai/           # Agent process visualizers and chat panels
+│   │   ├── contexts/         # Authentication provider (AuthContext JWT state)
+│   │   ├── hooks/            # Reusable client hooks
+│   │   ├── lib/              # Client utilities (Axios instance with JWT request interceptors)
+│   │   ├── pages/            # View components (9+ client pages)
+│   │   └── types/            # TypeScript schema types
+│   ├── README.md             # Frontend specific installation instructions
+│   └── .env.example          # Sample environment configurations
+└── README.md                 # Project root documentation
 ```
+
+---
+
+## 💻 Frontend Pages & Features
+
+The frontend application provides a complete visual dashboard for the CRM and AI agent functionalities:
+
+| Page | Client Route | Key Features |
+| :--- | :--- | :--- |
+| **Login** | `/login` | Standard login requiring secure credentials with error states and persistence. |
+| **Register** | `/register` | Triggers verification workflow and automatically routes to the OTP validation screen. |
+| **Dashboard** | `/dashboard` | Renders visual indicators for campaign success, active metrics charts (Recharts), and AI advice. |
+| **Customers** | `/customers` | Tabular customer grid supporting CRUD updates, custom filter controls, and loyal customer tracking. |
+| **Audience Builder** | `/audience` | Permits dynamic segment matching (e.g. cities, spending levels) and lists estimated audiences. |
+| **Campaigns** | `/campaigns` | Orchestrates new marketing plans, displays live worker processing logs, and lists previous history. |
+| **AI Campaign Studio** | `/ai-studio` | Graphical dashboard visualization showing current AI pipeline steps in real-time. |
+| **AI Analytics** | `/ai-analytics` | Conversational interface matching user inputs with natural language SQL results. |
+| **Settings** | `/settings` | Configures profiles and updates connection API endpoints. |
 
 ---
 
@@ -127,9 +163,10 @@ Here is a step-by-step story of what happens when someone uses my EngageOS:
 
 ---
 
-## 📊 Visual Workflow Flowchart
+## 📊 Visual Workflow Flowcharts
 
-This sequence flowchart shows how data flows through my system:
+### 1. Backend Asynchronous Campaign Processing Workflow
+This sequence flowchart shows how campaign processing and tracking data flows through the system when a goal is submitted:
 
 ```mermaid
 sequenceDiagram
@@ -170,38 +207,82 @@ sequenceDiagram
     Backend-->>Cust: Redirect customer to store website
 ```
 
+### 2. Frontend Authentication & Client Session Lifecycle
+This flowchart details how the React client securely registers a user, validates their session via OTP email dispatch, auto-acquires verification JWT keys, and authenticates subsequent dashboard APIs:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Marketer
+    participant Fe as React Client (Port 5173)
+    participant Be as Core Backend (Port 5000)
+    participant Channel as Channel Service (Port 6000)
+
+    User->>Fe: Inputs registration info (/register)
+    Fe->>Be: POST /auth/register (name, email, password)
+    Be->>Be: Create User (isVerified: false), generate OTP
+    Be->>Channel: Request SMTP OTP email delivery
+    Channel-->>User: Delivers OTP Code to Inbox
+    Be-->>Fe: Success (Redirect to verification view)
+
+    User->>Fe: Submits OTP code
+    Fe->>Be: POST /auth/verify-otp (email, otp)
+    Be->>Be: Set user isVerified: true, delete OTP entry
+    Be-->>Fe: OTP Verified successfully
+
+    Note over Fe, Be: Automatic Authentication Flow
+    Fe->>Be: POST /auth/login (auto-sign-in using credentials)
+    Be-->>Fe: Returns JWT Token (includes user id)
+    Fe->>Fe: Write JWT to AuthContext (Memory/Local Storage)
+
+    Note over Fe, Be: Subsequent API Request Authentication
+    Fe->>Be: GET /dashboard (Axios request header: "Authorization: Bearer <JWT>")
+    Be-->>Fe: Server Data Response (Charts, Campaigns, customers)
+    
+    Note over Fe, Be: Automatic Session Expiry Check
+    Fe->>Be: GET /audience (Token expired/Invalidated)
+    Be-->>Fe: HTTP 401 Unauthorized Response
+    Fe->>Fe: Axios interceptor triggers, clears session state
+    Fe-->>User: Redirect to Login View (/login)
+```
+
 ---
 
 ## ⚙️ Running Commands & Installation
 
-### Step 1: Run the Setup Script
-To make setting up easy, I created a Python helper script inside the backend directory. It will verify Node.js is on your computer, create template configuration files, and install all required files for both directories automatically.
+### Step 1: Run the Backend Setup Script
+To make setting up the backend components easy, navigate to the `backend/` directory and run the helper Python script. This verifies requirements, creates configurations, and installs npm files:
 
-First, navigate to the `backend/` directory:
 ```bash
 cd backend
-```
-
-Then, run the setup script:
-```bash
 python requirement.py
 ```
 
-### Step 2: Fill in Credentials
-After running the script, you will see two new files called `.env` (in the `backend/` folder) and `channel-service/.env` (in the `backend/channel-service/` folder). Open them and fill in:
+### Step 2: Fill in Backend Credentials
+Open `.env` (in the `backend/` folder) and `channel-service/.env` (in the `backend/channel-service/` folder) and fill in the required keys:
 *   `DATABASE_URL`: Link to your PostgreSQL database.
 *   `REDIS_URL`: Link to your running Redis server.
 *   `GEMINI_API_KEY`: Your Google Gemini API Key.
-*   `EMAIL_USER` & `EMAIL_PASS`: Gmail email and app password for sending emails.
+*   `EMAIL_USER` & `EMAIL_PASS`: Gmail email and app password for sending SMTP messages.
 
-### Step 3: Set up Database Tables
-From the `backend/` directory, run this command to create the tables inside your PostgreSQL database:
+### Step 3: Set up Backend Database Tables
+Run this command from the `backend/` directory to push the database models:
 ```bash
 npx prisma db push
 ```
 
-### Step 4: Start All Servers
-Navigate to the `backend/` directory and open separate terminal windows to run all parts of the app:
+### Step 4: Install & Configure the Frontend Client
+Navigate to the `frontend/` directory, install packages, and set up your endpoint environments:
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+```
+*Note: The local `.env` configuration file default matches the backend base endpoint (`VITE_API_BASE_URL=http://localhost:5000`). Make sure this is correct.*
+
+### Step 5: Start All Systems
+Open separate terminal tabs or terminal windows to run each piece of the application:
 
 *   **Terminal 1 (Core CRM Backend API):**
     ```bash
@@ -222,6 +303,20 @@ Navigate to the `backend/` directory and open separate terminal windows to run a
     ```bash
     cd backend
     npm run scheduler
+    ```
+*   **Terminal 5 (React Frontend Dev Server):**
+    ```bash
+    cd frontend
+    npm run dev
+    ```
+    Once started, open [http://localhost:5173](http://localhost:5173) in your browser.
+
+*   **Production Build & Preview (Optional):**
+    To test the production build of the frontend client locally:
+    ```bash
+    cd frontend
+    npm run build
+    npm run preview
     ```
 
 ---

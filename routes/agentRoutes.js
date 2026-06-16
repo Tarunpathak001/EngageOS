@@ -1,20 +1,18 @@
-const express =
-  require("express");
+const express = require("express");
 
-const router =
-  express.Router();
+const router = express.Router();
+
+const authMiddleware =
+  require("../middleware/authMiddleware");
 
 const {
   executeAgent
-} =
-require(
-  "../controllers/agentController"
-);
+} = require("../controllers/agentController");
 
 router.post(
   "/execute",
+  authMiddleware,
   executeAgent
 );
 
-module.exports =
-  router;
+module.exports = router;

@@ -7,7 +7,7 @@ const {
 const prisma =
   require("../prisma/prismaClient");
 
-  const axios =
+const axios =
   require("axios");
 
 const executeAgent =
@@ -29,36 +29,36 @@ const executeAgent =
       );
 
       console.log(
-  "AUDIENCE TYPE:",
-  typeof audience
-);
+        "AUDIENCE TYPE:",
+        typeof audience
+      );
 
-console.log(
-  "AUDIENCE JSON:",
-  JSON.stringify(
-    audience,
-    null,
-    2
-  )
-);
+      console.log(
+        "AUDIENCE JSON:",
+        JSON.stringify(
+          audience,
+          null,
+          2
+        )
+      );
 
       const where = {};
 
-if (audience.city) {
+      if (audience.city) {
 
-  where.city = {
+        where.city = {
 
-    equals: audience.city.trim(),
+          equals: audience.city.trim(),
 
-    mode: "insensitive"
+          mode: "insensitive"
 
-  };
+        };
 
-}
-console.log(
-  "FINAL WHERE:",
-  JSON.stringify(where, null, 2)
-);
+      }
+      console.log(
+        "FINAL WHERE:",
+        JSON.stringify(where, null, 2)
+      );
 
       if (
         audience.minSpend
@@ -157,10 +157,12 @@ console.log(
 
             channel:
               recommendation.bestChannel
-                || "EMAIL",
+              || "EMAIL",
 
             status:
               "DRAFT",
+
+            userId: req.user.id
 
           },
 
@@ -224,7 +226,7 @@ console.log(
 
     }
 
-};
+  };
 
 module.exports = {
   executeAgent

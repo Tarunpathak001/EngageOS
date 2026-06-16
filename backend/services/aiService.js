@@ -19,8 +19,8 @@ const parseAudiencePrompt =
 
       try {
 
-const result =
-  await model.generateContent(`
+        const result =
+          await model.generateContent(`
 You are an autonomous CRM Marketing Agent.
 
 Your job is to:
@@ -152,78 +152,78 @@ ${prompt}
 
 
 
-console.log(
-  "Using Fallback Audience Parser"
-);
+    console.log(
+      "Using Fallback Audience Parser"
+    );
 
-const spendMatch =
-  prompt.match(/\d+/);
+    const spendMatch =
+      prompt.match(/\d+/);
 
-const lowerPrompt =
-  prompt.toLowerCase();
+    const lowerPrompt =
+      prompt.toLowerCase();
 
-let city = null;
+    let city = null;
 
-const stopWords = [
+    const stopWords = [
 
-  "bring",
-  "back",
-  "all",
-  "find",
-  "customer",
-  "customers",
-  "send",
-  "offer",
-  "target",
-  "vip",
-  "premium",
-  "regular",
-  "from",
-  "to",
-  "and",
-  "with",
-  "campaign",
-  "email",
-  "mail",
-  "message"
+      "bring",
+      "back",
+      "all",
+      "find",
+      "customer",
+      "customers",
+      "send",
+      "offer",
+      "target",
+      "vip",
+      "premium",
+      "regular",
+      "from",
+      "to",
+      "and",
+      "with",
+      "campaign",
+      "email",
+      "mail",
+      "message"
 
-];
+    ];
 
-const words =
-  lowerPrompt.match(/[a-z]+/g) || [];
+    const words =
+      lowerPrompt.match(/[a-z]+/g) || [];
 
-for (const word of words) {
+    for (const word of words) {
 
-  if (!stopWords.includes(word)) {
+      if (!stopWords.includes(word)) {
 
-    city = word;
-    break;
+        city = word;
+        break;
 
-  }
+      }
 
-}
+    }
 
-return {
+    return {
 
-  city,
+      city,
 
-  minSpend:
-    spendMatch
-      ? Number(spendMatch[0])
-      : null,
+      minSpend:
+        spendMatch
+          ? Number(spendMatch[0])
+          : null,
 
-  segment:
-    lowerPrompt.includes("vip")
-      ? "VIP"
-      : lowerPrompt.includes("premium")
-      ? "Premium"
-      : lowerPrompt.includes("regular")
-      ? "Regular"
-      : null
+      segment:
+        lowerPrompt.includes("vip")
+          ? "VIP"
+          : lowerPrompt.includes("premium")
+            ? "Premium"
+            : lowerPrompt.includes("regular")
+              ? "Regular"
+              : null
 
-};
+    };
 
-};
+  };
 
 const generateCampaignContent =
   async (goal) => {
@@ -319,7 +319,7 @@ ${goal}
 
     };
 
-};
+  };
 
 const generateCampaignRecommendation =
   async (campaignData) => {
@@ -413,19 +413,19 @@ ${JSON.stringify(campaignData)}
 
     };
 
-};
+  };
 
 
 const askAnalyticsAI =
-async (
-  question,
-  campaignData
-)=>{
+  async (
+    question,
+    campaignData
+  ) => {
 
-  try{
+    try {
 
-    const result =
-      await model.generateContent(`
+      const result =
+        await model.generateContent(`
 
 You are a senior CRM strategist.
 
@@ -443,19 +443,19 @@ Return ONLY text.
 
 `);
 
-    return result
-      .response
-      .text();
+      return result
+        .response
+        .text();
 
-  }
-  catch(error){
+    }
+    catch (error) {
 
-    return
+      return
       "Unable to analyze campaigns currently.";
 
-  }
+    }
 
-};
+  };
 
 module.exports = {
   parseAudiencePrompt,

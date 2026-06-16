@@ -5,8 +5,8 @@ console.log(
 const axios =
   require("axios");
 
-  const prisma =
-    require("../prisma/prismaClient");
+const prisma =
+  require("../prisma/prismaClient");
 
 const { Worker } =
   require("bullmq");
@@ -23,83 +23,83 @@ const worker =
         job.data
       );
 
-const campaign =
-  await prisma.campaign.findUnique({
-    where: {
-      id:
-        job.data.campaignId,
-    },
-  });
+      const campaign =
+        await prisma.campaign.findUnique({
+          where: {
+            id:
+              job.data.campaignId,
+          },
+        });
 
-  const customer =
-  await prisma.customer.findUnique({
+      const customer =
+        await prisma.customer.findUnique({
 
-    where: {
-      id:
-        job.data.customerId,
-    },
+          where: {
+            id:
+              job.data.customerId,
+          },
 
-  });
+        });
 
-console.log(
-  "Sending Email To:",
-  customer.email
-);
+      console.log(
+        "Sending Email To:",
+        customer.email
+      );
 
-await axios.post(
-  `${process.env.CHANNEL_SERVICE_URL}/channel/send`,
-  {
+      await axios.post(
+        `${process.env.CHANNEL_SERVICE_URL}/channel/send`,
+        {
 
-    logId:
-      job.data.logId,
+          logId:
+            job.data.logId,
 
-    customerId:
-      job.data.customerId,
+          customerId:
+            job.data.customerId,
 
-    campaignId:
-      job.data.campaignId,
+          campaignId:
+            job.data.campaignId,
 
-    channel:
-      campaign.channel,
+          channel:
+            campaign.channel,
 
-    customer: {
+          customer: {
 
-      name:
-        customer.name,
+            name:
+              customer.name,
 
-      email:
-        customer.email,
+            email:
+              customer.email,
 
-      phone:
-        customer.phone,
+            phone:
+              customer.phone,
 
-    },
+          },
 
-    campaign: {
+          campaign: {
 
-      name:
-        campaign.name,
+            name:
+              campaign.name,
 
-      message:
-        campaign.message,
+            message:
+              campaign.message,
 
-    },
+          },
 
-  }
-);
+        }
+      );
 
-await prisma.campaign.update({
+      await prisma.campaign.update({
 
-  where: {
-    id:
-      job.data.campaignId,
-  },
+        where: {
+          id:
+            job.data.campaignId,
+        },
 
-  data: {
-    status: "SENT",
-  },
+        data: {
+          status: "SENT",
+        },
 
-});
+      });
 
       console.log(
         "Sent To Channel Service"
@@ -108,9 +108,9 @@ await prisma.campaign.update({
     },
 
     {
-connection: {
-  url: process.env.REDIS_URL,
-},
+      connection: {
+        url: process.env.REDIS_URL,
+      },
     }
 
   );

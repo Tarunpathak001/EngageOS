@@ -21,7 +21,7 @@ const transporter =
 
   });
 
-  transporter.verify(function (error, success) {
+transporter.verify(function (error, success) {
 
   if (error) {
 
@@ -45,33 +45,33 @@ const sendEmail =
     logId,
   ) => {
 
-await transporter.sendMail({
+    await transporter.sendMail({
 
-  from:
-    process.env.EMAIL_USER,
+      from:
+        process.env.EMAIL_USER,
 
-  to,
+      to,
 
-  subject,
+      subject,
 
-  html: `
-    <div>
+      html: `
+<div style="font-family:Arial,sans-serif">
 
-      <p>
-        ${message}
-      </p>
+<h2>${subject}</h2>
+
+<p>${message}</p>
 
 <br/>
 
 <a
 href="${process.env.BACKEND_URL}/tracking/click/${logId}"
->
 style="
 background:#9333ea;
 padding:12px 20px;
 color:white;
 text-decoration:none;
 border-radius:8px;
+display:inline-block;
 "
 >
 View Offer
@@ -81,18 +81,19 @@ View Offer
 src="${process.env.BACKEND_URL}/tracking/open/${logId}"
 width="1"
 height="1"
+alt=""
 />
 
-    </div>
-  `
+</div>
+`
 
-});
+    });
 
     console.log(
       `📧 Email Sent To ${to}`
     );
 
-};
+  };
 
 module.exports = {
   sendEmail,

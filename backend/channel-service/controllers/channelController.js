@@ -30,7 +30,7 @@ const sendMessage =
       channel,
       customer,
       campaign,
-      
+
     } = req.body;
 
     console.log(
@@ -38,50 +38,51 @@ const sendMessage =
       req.body
     );
 
-    switch (channel) {
 
-  case "EMAIL":
+    switch (channel.toUpperCase()) {
 
-await sendEmail(
-  customer.email,
-  campaign.name,
-  campaign.message,
-  logId
-);
+      case "EMAIL":
 
-    break;
+        await sendEmail(
+          customer.email,
+          campaign.name,
+          campaign.message,
+          logId
+        );
 
-  case "SMS":
+        break;
 
-    await sendSMS(
+      case "SMS":
 
-  customer.phone,
+        await sendSMS(
 
-  campaign.message
+          customer.phone,
 
-);
+          campaign.message
 
-    break;
+        );
 
-  case "WHATSAPP":
+        break;
 
-    await sendWhatsApp(
+      case "WHATSAPP":
 
-  customer.phone,
+        await sendWhatsApp(
 
-  campaign.message
+          customer.phone,
 
-);
+          campaign.message
 
-    break;
+        );
 
-  default:
+        break;
 
-    console.log(
-      "Unknown Channel"
-    );
+      default:
 
-}
+        console.log(
+          "Unknown Channel"
+        );
+
+    }
 
     res.status(200).json({
       success: true
@@ -121,7 +122,7 @@ await sendEmail(
       2000
     );
 
-};
+  };
 
 module.exports = {
   sendMessage

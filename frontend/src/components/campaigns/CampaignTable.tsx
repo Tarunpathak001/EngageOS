@@ -59,7 +59,21 @@ export function CampaignTable({
             <TableRow key={campaign.id}>
               <TableCell className="font-medium">{campaign.name}</TableCell>
               <TableCell>
-                <Badge variant="outline">{campaign.channel}</Badge>
+                {campaign.channel === "EMAIL" && (
+                  <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5">
+                    Email
+                  </Badge>
+                )}
+                {campaign.channel === "SMS" && (
+                  <Badge variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/5" title="SMS provider integration planned. Currently available for architecture demonstration.">
+                    SMS (Mock)
+                  </Badge>
+                )}
+                {campaign.channel === "WHATSAPP" && (
+                  <Badge variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/5" title="Official WhatsApp Cloud API integration planned. Currently available for architecture demonstration.">
+                    WhatsApp (Mock)
+                  </Badge>
+                )}
               </TableCell>
               <TableCell>
                 <Badge variant={statusVariant(campaign.status)}>

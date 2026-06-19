@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 const campaignSchema = z.object({
   name: z.string().min(2, "Campaign name is required"),
   message: z.string().min(10, "Message must be at least 10 characters"),
-  channel: z.enum(["EMAIL", "SMS", "WHATSAPP"]),
+  channel: z.enum(["EMAIL", "SMS", "WHATSAPP", "TELEGRAM"]),
   scheduledAt: z.string().optional(),
 });
 
@@ -54,6 +54,14 @@ export function CampaignForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* Channel Info Banner */}
+      <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3 text-xs text-blue-600 dark:text-blue-400 flex items-start gap-2 leading-relaxed">
+        <span className="mt-0.5 text-blue-500 font-semibold select-none">ℹ️</span>
+        <p>
+          EngageOS currently supports live Email campaigns. SMS and WhatsApp channels are available in mock mode to demonstrate the platform's multi-channel architecture.
+        </p>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="name">Campaign Name</Label>
         <Input id="name" {...register("name")} />
@@ -74,11 +82,64 @@ export function CampaignForm({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="EMAIL">Email</SelectItem>
-            <SelectItem value="SMS">SMS</SelectItem>
-            <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
+            <SelectItem value="EMAIL">
+              <div className="flex items-center justify-between w-full gap-4">
+                <span>Email</span>
+                <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  Available
+                </span>
+              </div>
+            </SelectItem>
+            <SelectItem 
+              value="SMS"
+              title="SMS provider integration planned. Currently available for architecture demonstration."
+            >
+              <div className="flex items-center justify-between w-full gap-4">
+                <span>SMS</span>
+                <span className="text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium px-2 py-0.5 rounded-full border border-amber-500/20">
+                  Mock Mode
+                </span>
+              </div>
+            </SelectItem>
+            <SelectItem 
+              value="WHATSAPP"
+              title="Official WhatsApp Cloud API integration planned. Currently available for architecture demonstration."
+            >
+              <div className="flex items-center justify-between w-full gap-4">
+                <span>WhatsApp</span>
+                <span className="text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium px-2 py-0.5 rounded-full border border-amber-500/20">
+                  Mock Mode
+                </span>
+              </div>
+            </SelectItem>
+            <SelectItem 
+              value="TELEGRAM"
+              disabled
+              title="Scheduled for future integration."
+            >
+              <div className="flex items-center justify-between w-full gap-4 opacity-50">
+                <span>Telegram</span>
+                <span className="text-[10px] bg-zinc-500/10 text-zinc-500 font-medium px-2 py-0.5 rounded-full border border-zinc-500/20">
+                  Coming Soon
+                </span>
+              </div>
+            </SelectItem>
           </SelectContent>
         </Select>
+
+        {/* Dynamic Channel Warning Banner */}
+        {channel === "SMS" && (
+          <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1.5 font-medium animate-fadeIn">
+            <span>⚠️</span>
+            <span>SMS channel is in Mock Mode. No real SMS messages will be delivered.</span>
+          </p>
+        )}
+        {channel === "WHATSAPP" && (
+          <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1.5 font-medium animate-fadeIn">
+            <span>⚠️</span>
+            <span>WhatsApp channel is in Mock Mode. No real WhatsApp messages will be delivered.</span>
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">

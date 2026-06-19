@@ -1,0 +1,17 @@
+{
+  "name": "engageos-root",
+  "version": "1.0.0",
+  "description": "EngageOS Root Package for Multi-Service Orchestration",
+  "private": true,
+  "scripts": {
+    "backend": "npm --prefix backend start",
+    "worker": "npm --prefix backend run worker",
+    "scheduler": "npm --prefix backend run scheduler",
+    "channel": "npm --prefix backend/channel-service run dev",
+    "frontend": "npm --prefix frontend run dev",
+    "dev": "concurrently --kill-others -n \"api,worker,scheduler,channel,frontend\" -c \"blue,magenta,cyan,yellow,green\" \"npm run backend\" \"npm run worker\" \"npm run scheduler\" \"npm run channel\" \"npm run frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

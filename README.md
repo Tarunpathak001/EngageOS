@@ -29,13 +29,44 @@ Rohan completes the entire task in **under 2 minutes** without writing a single 
 
 ## 🚀 Project Gist
 
-EngageOS is an AI-powered customer intelligence and marketing automation platform. It allows businesses to send marketing messages (email) to their customers using plain English goals (e.g. *"Send a weekend discount offer to all VIP customers living in Delhi"*).
-It currently supports email campaign delivery and provides an extensible channel architecture for future integrations such as Telegram, SMS, and WhatsApp.
+EngageOS is an AI-powered customer intelligence and marketing automation platform. It allows businesses to run automated, multi-channel marketing campaigns using plain English goals (e.g., *"Send a weekend discount offer to all VIP customers living in Delhi"*).
+
+The platform is designed around a **pluggable, decoupled multi-channel architecture**. Under this design, the core campaign orchestration, AI agent pipeline, and tracking logic remain completely channel-agnostic. Adding support for a new communication channel (like Telegram) or upgrading to a new provider simply requires implementing a single provider service inside the Channel Service, while leaving the rest of the backend and database schemas entirely unchanged.
 
 The platform comprises three primary packages:
 1. **Core Backend (Port 5000):** Manages CRM records, campaigns, dashboard statistics, session authentication, and hosts the autonomous AI Marketing Agent. Connects directly to PostgreSQL and Redis.
 2. **Channel Service (Port 6000):** A delivery microservice that routes message requests to Nodemailer SMTP or mock channels, embedding tracking pixels and redirect hooks.
 3. **React Enterprise Frontend (Port 5173):** A professional, responsive dashboard client featuring custom audience builders, AI campaign studio tracking, and chat-style analytics interfaces.
+
+---
+
+## 🔌 Communication Channels & Status
+
+EngageOS features a modular, channel-agnostic delivery microservice (**Channel Service**). The core campaign scheduler and AI orchestration layers do not know how messages are delivered; they delegate to specific channel provider classes. 
+
+*   **Extensible Adapter Design:** Adding a new channel only requires implementing a standardized provider class (under the `channel-service` package) and mapping it in the router.
+*   **Decoupled Workflows:** Customer CRM records, database schemas, analytics logs, and campaign workflows remain completely unchanged when channels are added or swapped.
+
+### Channel Integration Status
+
+| Channel | Current Status | Implementation Level | Notes & Integration Details |
+| :--- | :--- | :--- | :--- |
+| **Email** | ✅ Fully Implemented | Production-Ready (SMTP) | Fully functional SMTP-based delivery using Nodemailer. Supports dynamic HTML campaigns, automated email open tracking via 1x1 tracking pixels, and click tracking via backend redirect hooks. |
+| **SMS** | ⚠️ Architecture Implemented | Mock Delivery / API Ready | Core microservice routes and handler interfaces are fully implemented. Delivery uses a mock provider simulator; integration with a production SMS gateway (e.g., Twilio) is pending API key configuration. |
+| **WhatsApp** | ⚠️ Architecture Implemented | Mock Delivery / API Ready | Core microservice routes and handler interfaces are fully implemented. Delivery uses a mock provider simulator; official Meta WhatsApp Cloud API integration is pending. |
+| **Telegram** | 🚧 Planned | Roadmap / Next Phase | Scheduled for the next implementation phase; will leverage Telegram Bot API. |
+
+---
+
+## 💎 Key Features
+
+*   **AI-Powered Campaign Orchestration:** Plain English goals (parsed via Google Gemini AI) automatically generate database queries to filter customer audiences.
+*   **Pluggable Multi-Channel Architecture:** Easily extendable microservice design currently supporting SMTP email campaigns with pre-configured templates, alongside mock SMS and WhatsApp adapters.
+*   **Real-time Campaign Processing:** High-performance async campaign execution powered by Node.js, Express, Redis, and BullMQ background workers.
+*   **Automatic Campaign Tracking:** Automatic HTML injection of tracking pixels to log email `OPENED` metrics and link redirect hooks to log `CLICKED` events.
+*   **CRM Audience Segment Builder:** Dynamic segment creation based on customer location, order history, and spending thresholds.
+*   **AI-Driven Chat Analytics:** Interactive conversation panel that translates natural language queries into real-time database insights.
+*   **Enterprise Dashboard UI:** Complete React client designed with Tailwind CSS, TypeScript, and shadcn/ui components, featuring beautiful data charts powered by Recharts.
 
 ---
 
@@ -81,9 +112,9 @@ The repository is organized into a monorepo containing backend services and the 
 EngageOS/
 ├── backend/                  # Monorepo backend folder
 │   ├── channel-service/      # Message delivery service on Port 6000
-│   │   ├── controllers/      # Message channel routers (Email, SMS, WhatsApp)
+│   │   ├── controllers/      # Message channel routers (Email, mock SMS, mock WhatsApp)
 │   │   ├── routes/           # Channel service express endpoints
-│   │   ├── services/         # Nodemailer SMTP and mock delivery integrations
+│   │   ├── services/         # Nodemailer SMTP and mock channel services
 │   │   └── package.json      # Dependencies for delivery service
 │   ├── controllers/          # Business logic handlers
 │   │   ├── agentController.js    # AI Marketing Agent (Gemini API integrations)
@@ -297,7 +328,27 @@ cp .env.example .env
 *Note: The local `.env` configuration file default matches the backend base endpoint (`VITE_API_BASE_URL=http://localhost:5000`). Make sure this is correct.*
 
 ### Step 5: Start All Systems
-Open separate terminal tabs or terminal windows to run each piece of the application:
+
+To launch all 5 services simultaneously with colored prefix logs, open a terminal in the root workspace folder and run:
+
+```bash
+npm run dev
+```
+
+This starts the following components concurrently:
+*   **Backend API** (Core CRM Backend API on Port 5000)
+*   **Campaign Worker** (BullMQ asynchronous worker processing campaigns)
+*   **Scheduler Worker** (Cron scheduler polling database/queue)
+*   **Channel Service** (Message channel routing microservice on Port 6000)
+*   **Frontend** (React Enterprise Frontend dashboard on Port 5173)
+
+Once started, open [http://localhost:5173](http://localhost:5173) in your browser.
+
+> Note:
+> Scheduled campaign execution requires the Backend API, Redis, Campaign Worker, Scheduler Worker, and Channel Service to remain running.
+
+#### Alternative: Manual Startup (Optional)
+If you prefer starting each service in a separate terminal manually:
 
 *   **Terminal 1 (Core CRM Backend API):**
     ```bash
@@ -324,7 +375,6 @@ Open separate terminal tabs or terminal windows to run each piece of the applica
     cd frontend
     npm run dev
     ```
-    Once started, open [http://localhost:5173](http://localhost:5173) in your browser.
 
 *   **Production Build & Preview (Optional):**
     To test the production build of the frontend client locally:
@@ -333,6 +383,26 @@ Open separate terminal tabs or terminal windows to run each piece of the applica
     npm run build
     npm run preview
     ```
+
+---
+
+## 🕒 Scheduled Campaign Behavior
+
+Scheduled campaigns in EngageOS depend on the continuous operation of the platform's backend infrastructure. 
+
+*   **Infrastructure Dependency:** For scheduled campaigns to run successfully, all backend microservices and databases (Backend API, Redis, Campaign Worker, Scheduler Worker, and Channel Service) must be actively running.
+*   **Local Development Limits:** In a local development environment, shutting down your computer, stopping Docker, terminating Redis, or stopping the worker processes will prevent campaigns from executing at their scheduled times.
+*   **Service Reconnect & Recovery:** Once the development environment and background workers are restarted, any campaigns that became overdue while offline will be picked up and processed by the scheduler engine.
+*   **Expected Behavior:** This behavior is normal and expected for a local development configuration. In production environments, these services are deployed to highly available cloud platforms to ensure always-on operation.
+
+### Local Development vs Production
+
+| Feature             | Local Development                           | Production Deployment                      |
+| ------------------- | ------------------------------------------- | ------------------------------------------ |
+| Scheduled Campaigns | Requires developer machine to remain online | Runs continuously on hosted infrastructure |
+| Queue Processing    | Local Redis instance                        | Managed Redis / Cloud Redis                |
+| Email Delivery      | Local services                              | Always-on deployment                       |
+| Reliability         | Development only                            | Production-grade                           |
 
 ---
 
@@ -354,4 +424,22 @@ When an email is sent out, my system injects tracking endpoints into the HTML.
 
 ---
 
+## 🗺️ Roadmap & Future Enhancements
+
+As this platform is built with modularity and extensibility in mind, future updates are scheduled to expand its channel footprint and system resiliency:
+
+1.  **Production Integrations for Implemented Channel Interfaces:**
+    *   **SMS Channel:** Transition from mock delivery to a real-world SMS provider (e.g., Twilio, Infobip) by configuring the REST client handlers inside `channel-service/services/smsService.js`.
+    *   **WhatsApp Channel:** Integrate the official Meta WhatsApp Cloud API helper to support rich template notifications and media payloads.
+2.  **New Channel Integration:**
+    *   **Telegram Channel:** Implement a provider service to handle message dispatching to users via a Telegram Bot token and chat IDs.
+3.  **Enhanced Campaigns & Tracking:**
+    *   Add tracking features for SMS/WhatsApp via custom short URLs (e.g., `https://engage.os/t/:id`) to capture clicks in non-HTML communication mediums.
+    *   Incorporate fallback channel strategies (e.g., if WhatsApp fails, fall back to SMS).
+
+---
+
 This entire project was designed, coded, and tested by me as a solo developer to solve real-world marketing automation challenges.
+
+
+Designed, developed, and maintained by Tarun Pathak.

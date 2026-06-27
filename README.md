@@ -54,7 +54,7 @@ EngageOS features a modular, channel-agnostic delivery microservice (**Channel S
 | **Email** | ✅ Fully Implemented | Production-Ready (SMTP) | Fully functional SMTP-based delivery using Nodemailer. Supports dynamic HTML campaigns, automated email open tracking via 1x1 tracking pixels, and click tracking via backend redirect hooks. |
 | **SMS** | ⚠️ Architecture Implemented | Mock Delivery / API Ready | Core microservice routes and handler interfaces are fully implemented. Delivery uses a mock provider simulator; integration with a production SMS gateway (e.g., Twilio) is pending API key configuration. |
 | **WhatsApp** | ⚠️ Architecture Implemented | Mock Delivery / API Ready | Core microservice routes and handler interfaces are fully implemented. Delivery uses a mock provider simulator; official Meta WhatsApp Cloud API integration is pending. |
-| **Telegram** | 🚧 Planned | Roadmap / Next Phase | Scheduled for the next implementation phase; will leverage Telegram Bot API. |
+| **Telegram** | ✅ Fully Implemented | Production-Ready (Onboarding) | Secure start-token flow via Telegram Bot. Supports automatic customer email invitation, automated pairing updates, and dynamic campaign message routing. |
 
 ---
 
@@ -121,7 +121,8 @@ EngageOS/
 │   │   ├── campaignController.js # Campaign CRUD, history, and status trackers
 │   │   ├── customerController.js # Customer registers and order logs
 │   │   ├── authController.js     # User registration, logins, and OTP confirmation
-│   │   └── trackingController.js # Email click redirects and open tracking pixels
+│   │   ├── trackingController.js # Email click redirects and open tracking pixels
+│   │   └── telegramController.js # Secure Telegram connect, disconnect, and webhook controller
 │   ├── middleware/           # Route guards
 │   │   └── authMiddleware.js # JWT validation token checkers
 │   ├── prisma/               # Database management
@@ -130,7 +131,12 @@ EngageOS/
 │   ├── queues/               # Task scheduling queues
 │   │   └── campaignQueue.js  # BullMQ connection client
 │   ├── routes/               # Express endpoints matching routers
+│   │   ├── customerRoutes.js # Customer and telegram connect routes
+│   │   ├── telegramRoutes.js # Telegram webhook listener routes
+│   │   └── ...
 │   ├── services/             # Helper business logic helpers (AI prompt models)
+│   │   ├── emailService.js   # Nodemailer transporter and OTP/Invitation email templates
+│   │   └── telegramService.js # Secure UUID v4 token generator and Bot polling update listener
 │   ├── workers/              # Asynchronous background runner engines
 │   │   ├── campaignWorker.js # Queue process dispatch workers
 │   │   └── schedulerWorker.js # Cron scheduled checker workers

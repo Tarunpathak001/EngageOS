@@ -17,6 +17,13 @@ const createCampaign = async (req, res) => {
 
     const { name, message , channel, scheduledAt,} = req.body;
 
+    if (!name || !message || !channel) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required campaign fields."
+      });
+    }
+
     const finalScheduledAt =
   scheduledAt
     ? new Date(
@@ -50,6 +57,8 @@ data: {
 
       });
 
+    console.log(`[CAMPAIGN] Campaign Created: ${campaign.name}`);
+
     res.status(201).json(
       campaign
     );
@@ -58,7 +67,7 @@ data: {
 {
 
   console.error(
-    "Create Campaign Error:",
+    "[CAMPAIGN] Error creating campaign:",
     error
   );
 
@@ -199,9 +208,6 @@ const clicked =
   }
 };
 const sendCampaign = async (req, res) => {
-  console.log(
-  "SEND CAMPAIGN HIT"
-);
   try {
 
     const campaignId =
@@ -222,42 +228,32 @@ const sendCampaign = async (req, res) => {
 
  let customers = [];
 
-if (req.body.customerIds) {
+ if (req.body.customerIds) {
 
-  customers =
-    await prisma.customer.findMany({
+   customers =
+     await prisma.customer.findMany({
 
-      where: {
+       where: {
 
-        id: {
+         id: {
 
-          in:
-            req.body.customerIds,
+           in:
+             req.body.customerIds,
 
-        },
+         },
 
-      },
+       },
 
-    });
+     });
 
-} else {
+ } else {
 
-  customers =
-    await buildAudience(
-      req.body
-    );
+   customers =
+     await buildAudience(
+       req.body
+     );
 
-}
-
-console.log(
-  "Sending To:",
-  customers.map(
-    c => ({
-      id: c.id,
-      city: c.city
-    })
-  )
-);
+ }
 
     const logs = [];
 
@@ -272,50 +268,35 @@ console.log(
           },
         });
 
-const delay =
-
-  campaign.scheduledAt
-
-    ? new Date(
+      const delay =
         campaign.scheduledAt
-      ).getTime()
+          ? new Date(
+              campaign.scheduledAt
+            ).getTime()
+            - Date.now()
+          : 0;
 
-      - Date.now()
+      await campaignQueue.add(
+        "send-message",
+        {
+          logId: log.id,
+          customerId: customer.id,
+          campaignId,
+        },
+        {
+          delay:
+            delay > 0
+              ? delay
+              : 0,
+        }
+      );
 
-    : 0;
-console.log(
-  "ADDING JOB",
-  {
-    customerId: customer.id,
-    campaignId,
-    delay
-  }
-);
-await campaignQueue.add(
-  "send-message",
-  {
-    logId: log.id,
-    customerId: customer.id,
-    campaignId,
-  },
-  {
-    delay:
-      delay > 0
-        ? delay
-        : 0,
-  }
-);
-console.log(
-  "ADDING JOB",
-  {
-    customerId: customer.id,
-    campaignId,
-    delay
-  }
-);
+      console.log(`[QUEUE] Job Added - send-message for campaign ${campaignId}, customer ${customer.id}`);
 
       logs.push(log);
     }
+
+    console.log(`[CAMPAIGN] Campaign Sent: ${campaign.name} to ${customers.length} customers`);
 
     res.status(200).json({
       campaignId,
@@ -325,6 +306,8 @@ console.log(
     });
 
   } catch (error) {
+
+    console.error("[CAMPAIGN] Error sending campaign:", error);
 
     res.status(500).json({
       message: error.message,
@@ -645,7 +628,7 @@ const deleteCampaign =
 
     } catch (error) {
 
-      console.log(error);
+      console.error("[CAMPAIGN] Error deleting campaign:", error);
 
       res.status(500).json({
         message: error.message,

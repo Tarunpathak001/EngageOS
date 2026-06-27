@@ -23,25 +23,6 @@ const executeAgent =
           goal
         );
 
-      console.log(
-        "Parsed Audience:",
-        audience
-      );
-
-      console.log(
-        "AUDIENCE TYPE:",
-        typeof audience
-      );
-
-      console.log(
-        "AUDIENCE JSON:",
-        JSON.stringify(
-          audience,
-          null,
-          2
-        )
-      );
-
       const where = {};
 
       if (audience.city) {
@@ -55,10 +36,6 @@ const executeAgent =
         };
 
       }
-      console.log(
-        "FINAL WHERE:",
-        JSON.stringify(where, null, 2)
-      );
 
       if (
         audience.minSpend
@@ -113,11 +90,6 @@ const executeAgent =
 
       }
 
-      console.log(
-        "Where Clause:",
-        where
-      );
-
       const matchedCustomers =
         await prisma.customer.findMany({
 
@@ -126,7 +98,7 @@ const executeAgent =
         });
 
       console.log(
-        "Customers Found:",
+        "[AI] Matched Customers Found:",
         matchedCustomers.length
       );
 
@@ -213,7 +185,7 @@ const executeAgent =
 
     } catch (error) {
 
-      console.error(error);
+      console.error("[AI] Agent execution error:", error);
 
       res.status(500).json({
 

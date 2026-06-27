@@ -21,6 +21,12 @@ export interface Customer {
   city?: string | null;
   totalSpend: number;
   createdAt: string;
+  telegramChatId?: string | null;
+  telegramUsername?: string | null;
+  telegramConnected: boolean;
+  telegramConnectedAt?: string | null;
+  telegramInviteToken?: string | null;
+  telegramInviteExpiresAt?: string | null;
   orders?: Order[];
   communicationLogs?: CommunicationLog[];
 }
@@ -121,10 +127,13 @@ export interface AudiencePreview {
 }
 
 export interface CampaignRecommendation {
-  bestChannel: string;
-  recommendedAudience: string;
-  expectedOpenRate: string;
-  reason: string;
+  bestChannel?: string;
+  recommendedAudience?: string;
+  expectedOpenRate?: string;
+  reason?: string;
+  hasEnoughData?: boolean;
+  success?: boolean;
+  message?: string;
 }
 
 export interface GeneratedCampaign {

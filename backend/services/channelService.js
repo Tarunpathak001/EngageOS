@@ -130,7 +130,7 @@ const sendMessage =
       });
 
       console.log(
-        `Email Sent To: ${customer.email}`
+        `[EMAIL] Email Sent To: ${customer.email}`
       );
 
       return {
@@ -145,7 +145,7 @@ const sendMessage =
     } catch (error) {
 
       console.error(
-        "Email Error:",
+        "[EMAIL] Email Error:",
         error.message
       );
 

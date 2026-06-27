@@ -101,6 +101,11 @@ export function CampaignDetail() {
                   WhatsApp (Mock)
                 </Badge>
               )}
+              {campaign.channel === "TELEGRAM" && (
+                <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5">
+                  Telegram
+                </Badge>
+              )}
             </div>
             <p className="text-sm text-muted-foreground">
               Created {formatDate(campaign.createdAt)}

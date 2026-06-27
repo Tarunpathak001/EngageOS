@@ -24,6 +24,9 @@ require("./routes/agentRoutes");
 
 const trackingRoutes = require("./routes/trackingRoutes");
 
+const telegramRoutes = require("./routes/telegramRoutes");
+const { initBot } = require("./services/telegramService");
+
 
 const app = express();
 
@@ -38,6 +41,7 @@ app.use("/auth", authRoutes);
 app.use("/agents", agentRoutes);
 app.use("/analytics-agent",analyticsAgentRoutes);
 app.use("/tracking",trackingRoutes);
+app.use("/telegram", telegramRoutes);
 
 app.get("/", (req, res) => {
   res.send("CRM Backend Running");
@@ -49,6 +53,7 @@ const PORT =
 
 app.listen(PORT, () => {
   console.log(
-    `Server running on port ${PORT}`
+    `[SERVER] Server running on port ${PORT}`
   );
+  initBot();
 });

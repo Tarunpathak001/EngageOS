@@ -118,7 +118,7 @@ ${prompt}
           result.response.text();
 
         console.log(
-          "Gemini Raw Response:",
+          "[AI] Gemini Raw Response:",
           response
         );
 
@@ -133,7 +133,7 @@ ${prompt}
       } catch (error) {
 
         console.error(
-          `Attempt ${attempt} Failed`,
+          `[AI] Attempt ${attempt} Failed:`,
           error.message
         );
 
@@ -153,7 +153,7 @@ ${prompt}
 
 
     console.log(
-      "Using Fallback Audience Parser"
+      "[AI] Using Fallback Audience Parser"
     );
 
     const spendMatch =
@@ -268,7 +268,7 @@ ${goal}
           result.response.text();
 
         console.log(
-          "Campaign Response:",
+          "[AI] Campaign Response:",
           response
         );
 
@@ -285,7 +285,7 @@ ${goal}
       } catch (error) {
 
         console.error(
-          `Campaign Attempt ${attempt} Failed:`,
+          `[AI] Campaign Attempt ${attempt} Failed:`,
           error.message
         );
 
@@ -306,7 +306,7 @@ ${goal}
     }
 
     console.log(
-      "Using Fallback Campaign"
+      "[AI] Using Fallback Campaign"
     );
 
     return {
@@ -356,7 +356,7 @@ ${JSON.stringify(campaignData)}
           result.response.text();
 
         console.log(
-          "Recommendation Response:",
+          "[AI] Recommendation Response:",
           response
         );
 
@@ -373,7 +373,7 @@ ${JSON.stringify(campaignData)}
       } catch (error) {
 
         console.error(
-          `Recommendation Attempt ${attempt} Failed:`,
+          `[AI] Recommendation Attempt ${attempt} Failed:`,
           error.message
         );
 
@@ -394,7 +394,7 @@ ${JSON.stringify(campaignData)}
     }
 
     console.log(
-      "Using Fallback Recommendation"
+      "[AI] Using Fallback Recommendation"
     );
 
     return {

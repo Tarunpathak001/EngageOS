@@ -18,13 +18,18 @@ export function Dashboard() {
     queryFn: async () => (await dashboardApi.getAnalytics()).data,
   });
 
+  const hasEnoughData = statsQuery.data
+    ? statsQuery.data.totalCustomers > 0 && statsQuery.data.totalCampaigns > 0 && statsQuery.data.delivered > 0
+    : false;
+
   const recommendationQuery = useQuery({
     queryKey: ["dashboard", "recommendation"],
     queryFn: async () => (await dashboardApi.getRecommendation()).data,
+    enabled: !!statsQuery.data && hasEnoughData,
   });
 
   const error =
-    statsQuery.error || analyticsQuery.error || recommendationQuery.error;
+    statsQuery.error || analyticsQuery.error || (hasEnoughData ? recommendationQuery.error : null);
 
   return (
     <div className="space-y-8">
@@ -46,7 +51,8 @@ export function Dashboard() {
         </div>
         <RecommendationCard
           recommendation={recommendationQuery.data}
-          isLoading={recommendationQuery.isLoading}
+          isLoading={statsQuery.isLoading || (hasEnoughData && recommendationQuery.isLoading)}
+          hasEnoughData={hasEnoughData}
         />
       </div>
     </div>

@@ -19,6 +19,12 @@ const {
   "../services/whatsappService"
 );
 
+const {
+  sendTelegram,
+} = require(
+  "../services/telegramService"
+);
+
 
 const sendMessage =
   async (req, res) => {
@@ -34,8 +40,7 @@ const sendMessage =
     } = req.body;
 
     console.log(
-      "Message Received:",
-      req.body
+      `[EMAIL] Message Received: logId=${logId}, channel=${channel}`
     );
 
 
@@ -48,6 +53,15 @@ const sendMessage =
           campaign.name,
           campaign.message,
           logId
+        );
+
+        break;
+
+      case "TELEGRAM":
+
+        await sendTelegram(
+          customer.telegramChatId,
+          campaign.message
         );
 
         break;
@@ -78,8 +92,8 @@ const sendMessage =
 
       default:
 
-        console.log(
-          "Unknown Channel"
+        console.warn(
+          `[EMAIL] Unknown Channel: ${channel}`
         );
 
     }
@@ -105,7 +119,7 @@ const sendMessage =
           );
 
           console.log(
-            `Log ${logId} -> DELIVERED`
+            `[EMAIL] Log ${logId} -> DELIVERED`
           );
 
           // 70% users open mail
@@ -113,6 +127,7 @@ const sendMessage =
         } catch (error) {
 
           console.error(
+            "[EMAIL] Error sending receipt callback:",
             error.message
           );
 

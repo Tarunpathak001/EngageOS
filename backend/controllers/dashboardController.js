@@ -11,8 +11,6 @@ const {
 const getDashboardStats =
   async (req, res) => {
 
-    console.time("dashboard");
-
     try {
 
       const totalCustomers =
@@ -84,25 +82,17 @@ const getDashboardStats =
         delivered === 0
           ? 0
           : (
-            (opened / delivered) *
-            100
-          ).toFixed(2);
+              (opened / delivered) *
+              100
+            ).toFixed(2);
 
       const ctr =
         opened === 0
           ? 0
           : (
-            (clicked / opened) *
-            100
-          ).toFixed(2);
-
-      console.log({
-        delivered,
-        opened,
-        clicked,
-        failed,
-        pending
-      });
+              (clicked / opened) *
+              100
+            ).toFixed(2);
 
       res.status(200).json({
 
@@ -130,12 +120,13 @@ const getDashboardStats =
 
     } catch (error) {
 
+      console.error("[DASHBOARD] Error fetching dashboard stats:", error);
+
       res.status(500).json({
         message: error.message,
       });
 
     }
-    console.timeEnd("dashboard");
 
   };
 
@@ -203,6 +194,14 @@ const getAIRecommendation =
           }
         })
 
+      if (customers === 0 || campaigns === 0 || delivered === 0) {
+        return res.status(200).json({
+          success: true,
+          hasEnoughData: false,
+          message: "Not enough campaign data to generate AI recommendations."
+        });
+      }
+
       const recommendation =
         await generateCampaignRecommendation({
 
@@ -220,11 +219,15 @@ const getAIRecommendation =
 
         });
 
-      res.status(200).json(
-        recommendation
-      );
+      res.status(200).json({
+        success: true,
+        hasEnoughData: true,
+        ...recommendation
+      });
 
     } catch (error) {
+
+      console.error("[DASHBOARD] AI Recommendation error:", error);
 
       res.status(500).json({
         message:
@@ -335,8 +338,9 @@ const getDashboardAnalytics =
         analytics
       );
 
-    }
-    catch (error) {
+    } catch (error) {
+
+      console.error("[DASHBOARD] Error getting dashboard analytics:", error);
 
       res.status(500).json({
         message: error.message

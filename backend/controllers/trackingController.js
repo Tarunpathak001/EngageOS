@@ -12,7 +12,7 @@ async (req,res)=>{
       );
 
     console.log(
-      `EMAIL OPENED -> ${logId}`
+      `[EMAIL] Email Opened for Log ID: ${logId}`
     );
 
     await prisma.communicationLog.update({
@@ -31,6 +31,7 @@ async (req,res)=>{
   catch(error){
 
     console.error(
+      "[EMAIL] Tracking error:",
       error.message
     );
 
@@ -62,7 +63,7 @@ async (req,res)=>{
       );
 
     console.log(
-      `EMAIL CLICKED -> ${logId}`
+      `[EMAIL] Email Clicked for Log ID: ${logId}`
     );
 
     await prisma.communicationLog.update({
@@ -81,6 +82,7 @@ async (req,res)=>{
   catch(error){
 
     console.error(
+      "[EMAIL] Tracking error:",
       error.message
     );
 

@@ -18,24 +18,23 @@ const register =
 
     try {
 
-      console.log("===== REGISTER START =====");
-
       const {
         name,
         email,
         password,
       } = req.body;
 
-      console.log("Email:", email);
+      if (!name || !email || !password) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing required registration fields."
+        });
+      }
 
-      console.log("Checking existing user...");
-
-const existingUser =
-  await prisma.user.findUnique({
-    where: { email },
-  });
-
-console.log("Existing user:", existingUser);
+      const existingUser =
+        await prisma.user.findUnique({
+          where: { email },
+        });
 
       if (existingUser) {
 
@@ -51,7 +50,6 @@ console.log("Existing user:", existingUser);
           password,
           10
         );
-console.log("Creating user...");
       await prisma.user.create({
 
         data: {
@@ -62,14 +60,12 @@ console.log("Creating user...");
         },
 
       });
-      console.log("User created successfully");
 
       const otp =
         Math.floor(
           100000 +
           Math.random() * 900000
         ).toString();
-console.log("Creating OTP...");
       await prisma.oTP.create({
 
         data: {
@@ -87,47 +83,40 @@ console.log("Creating OTP...");
         },
 
       });
-console.log("OTP created successfully");
 
-console.log("Sending email...");
+      try {
 
-try {
+        await sendOTPEmail(
+          email,
+          otp
+        );
 
-  await sendOTPEmail(
-    email,
-    otp
-  );
+      } catch (err) {
+        console.error(`[AUTH] Failed to send registration email to ${email}:`, err.message);
+      }
 
-  console.log(
-    "Email sent successfully"
-  );
+      console.log(`[AUTH] User Registered: ${email}`);
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[AUTH] Generated OTP for ${email} (dev-only): ${otp}`);
+      }
 
-} catch (err) {
+      res.status(201).json({
 
-  console.log(
-    "Email failed but user created"
-  );
+        message:
+          "OTP generated successfully",
 
-}
+      });
+    } catch (error) {
 
-res.status(201).json({
+      console.error(`[AUTH] Registration error:`, error);
 
-  message:
-    "OTP generated successfully",
+      return res.status(500).json({
+        message: error.message
+      });
 
-});
-} catch (error) {
+    }
 
-  console.log("REGISTER ERROR");
-  console.log(error);
-
-  return res.status(500).json({
-    message: error.message
-  });
-
-}
-
-};
+  };
 
 const verifyOTP =
   async (req, res) => {
@@ -254,6 +243,13 @@ const login =
         password,
       } = req.body;
 
+      if (!email || !password) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing email or password."
+        });
+      }
+
       const user =
         await prisma.user.findUnique({
           where: { email },
@@ -305,6 +301,8 @@ const token = jwt.sign(
   }
 );
 
+      console.log(`[AUTH] Login Successful: ${email}`);
+
       res.status(200).json({
 
         token,
@@ -319,6 +317,8 @@ const token = jwt.sign(
 
     } catch (error) {
 
+      console.error("[AUTH] Login error:", error);
+
       res.status(500).json({
         message:
           error.message,
@@ -326,7 +326,7 @@ const token = jwt.sign(
 
     }
 
-};
+  };
 
 const forgotPassword =
   async (req, res) => {

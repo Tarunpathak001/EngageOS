@@ -58,7 +58,7 @@ export function CampaignForm({
       <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3 text-xs text-blue-600 dark:text-blue-400 flex items-start gap-2 leading-relaxed">
         <span className="mt-0.5 text-blue-500 font-semibold select-none">ℹ️</span>
         <p>
-          EngageOS currently supports live Email campaigns. SMS and WhatsApp channels are available in mock mode to demonstrate the platform's multi-channel architecture.
+          EngageOS currently supports live Email and Telegram campaigns. SMS and WhatsApp channels are available in mock mode to demonstrate the platform's multi-channel architecture.
         </p>
       </div>
 
@@ -112,15 +112,11 @@ export function CampaignForm({
                 </span>
               </div>
             </SelectItem>
-            <SelectItem 
-              value="TELEGRAM"
-              disabled
-              title="Scheduled for future integration."
-            >
-              <div className="flex items-center justify-between w-full gap-4 opacity-50">
+            <SelectItem value="TELEGRAM">
+              <div className="flex items-center justify-between w-full gap-4">
                 <span>Telegram</span>
-                <span className="text-[10px] bg-zinc-500/10 text-zinc-500 font-medium px-2 py-0.5 rounded-full border border-zinc-500/20">
-                  Coming Soon
+                <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  Available
                 </span>
               </div>
             </SelectItem>

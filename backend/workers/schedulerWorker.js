@@ -5,6 +5,7 @@ const campaignQueue =
   require("../queues/campaignQueue");
 
 setInterval(async () => {
+  console.log("[SCHEDULER] Triggered");
 
   try {
 
@@ -26,7 +27,7 @@ setInterval(async () => {
     for (const campaign of campaigns) {
 
       console.log(
-        `Running Campaign ${campaign.id}`
+        `[SCHEDULER] Running Campaign ${campaign.id}`
       );
 
       const customers =
@@ -68,6 +69,8 @@ setInterval(async () => {
           }
         );
 
+        console.log(`[QUEUE] Job Added - send-message for campaign ${campaign.id}, customer ${customer.id}`);
+
       }
 
       await prisma.campaign.update({
@@ -86,7 +89,8 @@ setInterval(async () => {
 
   } catch (error) {
 
-    console.log(
+    console.error(
+      "[SCHEDULER] Error during trigger execution:",
       error.message
     );
 
@@ -95,5 +99,5 @@ setInterval(async () => {
 }, 30000);
 
 console.log(
-  "Scheduler Worker Started"
+  "[SCHEDULER] Worker Started"
 );

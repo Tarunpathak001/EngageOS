@@ -424,22 +424,71 @@ When an email is sent out, my system injects tracking endpoints into the HTML.
 
 ---
 
+## 🤖 Secure Telegram Onboarding & Account Linking (OAuth-style Email Flow)
+
+EngageOS implements a secure, automated, email-driven Telegram onboarding flow. This ensures that every customer connects **their own Telegram account** via a secure paired token, without requiring manual administrator setup.
+
+### 🗺️ Connection Architecture
+
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant CRM as CRM Web Dashboard
+    participant API as Backend Server
+    participant Email as SMTP Email Service
+    actor Customer as Customer (Email & Telegram App)
+    participant Bot as Telegram Bot API
+
+    Admin->>CRM: Clicks "Send Telegram Invitation"
+    CRM->>API: POST /customers/:id/telegram/connect
+    Note over API: Generates secure UUID v4 token<br/>Expires in 24 hours
+    API->>Email: Sends onboarding email
+    Email-->>Customer: Delivers onboarding message
+    Note over Customer: Customer clicks secure start link in email
+    Customer->>Bot: Presses START button
+    Bot->>API: Sends pairing token (/start TOKEN)
+    Note over API: Verifies token existence, expiry, and one-time state
+    API->>API: Links customer's telegramChatId & telegramUsername
+    API->>API: Immediately deletes pairing token from DB
+    API->>Bot: Dispatches success reply
+    Bot-->>Customer: "Success! Your profile is linked."
+    API-->>CRM: Status updates dynamically to Connected
+```
+
+### ⚙️ Configuration & Customer Onboarding
+
+1. **Set Up the Bot**:
+   Create a bot on Telegram via [@BotFather](https://t.me/BotFather) and copy the API Token.
+2. **Configure Environment Variables** in `backend/.env`:
+   ```bash
+   TELEGRAM_BOT_TOKEN="your_bot_token_here"
+   TELEGRAM_POLLING="true" # Set to true to listen to update callbacks locally
+   EMAIL_USER="your_gmail@gmail.com"
+   EMAIL_PASS="your_app_password"
+   ```
+3. **Onboarding Action**:
+   - The Administrator creates a customer profile and navigates to the Customer Details view.
+   - Under the **Telegram Onboarding** board, the admin clicks **Send Telegram Invitation**.
+   - EngageOS generates a UUID token and emails the customer a beautifully formatted onboarding email containing the secure login start link (`https://t.me/BotUsername?start=UUID`).
+   - The customer clicks the link in their email and presses **START** inside Telegram. Pairing is completed instantly and securely.
+
+### 🔒 Security & Campaign Delivery Constraints
+- **One-Time & Expiring Tokens**: Verification tokens are UUID v4, valid for 24 hours, and immediately purged on successful connection.
+- **Why Customers Pair Independently**: Manual admin mapping fails in real production SaaS products since it links multiple profiles to the administrator's account. This email-driven setup allows secure, independent customer pairing.
+- **Campaign Worker Gating**: When executing campaigns on the `TELEGRAM` channel, the Campaign Worker verifies that `telegramConnected === true` and `telegramChatId !== null`. Unlinked customers are skipped gracefully and logged, preventing system errors.
+
+---
+
 ## 🗺️ Roadmap & Future Enhancements
 
 As this platform is built with modularity and extensibility in mind, future updates are scheduled to expand its channel footprint and system resiliency:
 
-1.  **Production Integrations for Implemented Channel Interfaces:**
-    *   **SMS Channel:** Transition from mock delivery to a real-world SMS provider (e.g., Twilio, Infobip) by configuring the REST client handlers inside `channel-service/services/smsService.js`.
-    *   **WhatsApp Channel:** Integrate the official Meta WhatsApp Cloud API helper to support rich template notifications and media payloads.
-2.  **New Channel Integration:**
-    *   **Telegram Channel:** Implement a provider service to handle message dispatching to users via a Telegram Bot token and chat IDs.
-3.  **Enhanced Campaigns & Tracking:**
-    *   Add tracking features for SMS/WhatsApp via custom short URLs (e.g., `https://engage.os/t/:id`) to capture clicks in non-HTML communication mediums.
-    *   Incorporate fallback channel strategies (e.g., if WhatsApp fails, fall back to SMS).
+1. **Production Integrations for Implemented Channel Interfaces:**
+   * **SMS Channel:** Transition from mock delivery to a real-world SMS provider (e.g., Twilio, Infobip) by configuring the REST client handlers inside `channel-service/services/smsService.js`.
+   * **WhatsApp Channel:** Integrate the official Meta WhatsApp Cloud API helper to support rich template notifications and media payloads.
+2. **Resilience & Fallbacks:**
+   * Incorporate fallback channel strategies (e.g., if WhatsApp fails, fall back to SMS).
 
 ---
-
-This entire project was designed, coded, and tested by me as a solo developer to solve real-world marketing automation challenges.
-
 
 Designed, developed, and maintained by Tarun Pathak.

@@ -23,6 +23,8 @@ const previewAudience =
 
     } catch (error) {
 
+      console.error("[AUDIENCE] Error previewing audience:", error);
+
       res.status(500).json({
         message: error.message,
       });
@@ -41,10 +43,10 @@ const previewAudienceFromPrompt =
           prompt
         );
 
-        console.log(
-  "AI FILTERS:",
-  filters
-);
+      console.log(
+        "[AI] Parsed filters from prompt:",
+        filters
+      );
 
 
       const customers =
@@ -66,6 +68,8 @@ const previewAudienceFromPrompt =
       });
 
     } catch (error) {
+
+      console.error("[AUDIENCE] Error previewing audience from prompt:", error);
 
       res.status(500).json({
         message: error.message,

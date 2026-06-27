@@ -2,7 +2,7 @@ const sendSMS =
   async () => {
 
     console.log(
-      "📱 SMS Sent"
+      "[SMS] SMS message sent successfully"
     );
 
     return true;

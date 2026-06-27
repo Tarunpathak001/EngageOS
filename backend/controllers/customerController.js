@@ -148,8 +148,16 @@ const createCustomer = async (req, res) => {
       email,
       phone,
       city,
-      totalSpend
+      totalSpend,
+      telegramChatId
     } = req.body;
+
+    if (!name || !email || !city || totalSpend === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required customer fields."
+      });
+    }
 
     const customer =
       await prisma.customer.create({
@@ -165,7 +173,9 @@ const createCustomer = async (req, res) => {
           city,
 
           totalSpend:
-            Number(totalSpend)
+            Number(totalSpend),
+
+          telegramChatId
 
         }
 
@@ -184,6 +194,54 @@ const createCustomer = async (req, res) => {
 
   }
 
+};
+
+const updateCustomer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      email,
+      phone,
+      city,
+      totalSpend,
+      telegramChatId
+    } = req.body;
+
+    if (!id || isNaN(Number(id))) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid customer ID."
+      });
+    }
+
+    if (!name || !email || !city || totalSpend === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required customer fields."
+      });
+    }
+
+    const customer = await prisma.customer.update({
+      where: {
+        id: Number(id),
+      },
+      data: {
+        name,
+        email,
+        phone,
+        city,
+        totalSpend: totalSpend !== undefined ? Number(totalSpend) : undefined,
+        telegramChatId,
+      },
+    });
+
+    res.status(200).json(customer);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 };
 
 const deleteCustomer =
@@ -218,7 +276,7 @@ const deleteCustomer =
 
     } catch (error) {
 
-      console.log(error);
+      console.error("[CUSTOMER] Error deleting customer:", error);
 
       res.status(500).json({
         message: error.message,
@@ -234,6 +292,7 @@ module.exports = {
   getCustomerById,
   getHighSpenders,
   createCustomer,
+  updateCustomer,
   filterCustomers,
   deleteCustomer,
 };

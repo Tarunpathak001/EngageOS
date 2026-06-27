@@ -25,13 +25,12 @@ transporter.verify(function (error, success) {
 
   if (error) {
 
-    console.log("SMTP ERROR:");
-    console.log(error);
+    console.error("[EMAIL] SMTP connection error:", error);
 
   } else {
 
     console.log(
-      "SMTP SERVER READY"
+      "[EMAIL] SMTP SERVER READY"
     );
 
   }
@@ -90,7 +89,7 @@ alt=""
     });
 
     console.log(
-      `📧 Email Sent To ${to}`
+      `[EMAIL] Email Sent To: ${to}`
     );
 
   };

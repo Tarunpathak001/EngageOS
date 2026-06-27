@@ -6,8 +6,15 @@ const {
   getHighSpenders,
   filterCustomers,
   createCustomer,
+  updateCustomer,
   deleteCustomer,
 } = require("../controllers/customerController");
+
+const {
+  generateInvite,
+  disconnectTelegram,
+  getConnectionStatus,
+} = require("../controllers/telegramController");
 
 const authMiddleware =
   require("../middleware/authMiddleware");
@@ -21,7 +28,13 @@ router.get("/", getCustomers);
 
 router.post("/",createCustomer);
 
+router.put("/:id", updateCustomer);
+
 router.delete("/:id",deleteCustomer);
+
+router.post("/:id/telegram/connect", generateInvite);
+router.post("/:id/telegram/disconnect", disconnectTelegram);
+router.get("/:id/telegram/status", getConnectionStatus);
 
 router.get(
   "/high-spenders",

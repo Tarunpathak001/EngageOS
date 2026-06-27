@@ -6,11 +6,13 @@ import type { CampaignRecommendation } from "@/types";
 interface RecommendationCardProps {
   recommendation?: CampaignRecommendation;
   isLoading: boolean;
+  hasEnoughData?: boolean;
 }
 
 export function RecommendationCard({
   recommendation,
   isLoading,
+  hasEnoughData,
 }: RecommendationCardProps) {
   if (isLoading) {
     return (
@@ -26,6 +28,9 @@ export function RecommendationCard({
     );
   }
 
+  const isDataInsufficient =
+    hasEnoughData === false || recommendation?.hasEnoughData === false;
+
   return (
     <Card className="border-blue-100 bg-blue-50/30">
       <CardHeader className="flex flex-row items-center gap-3 space-y-0">
@@ -37,7 +42,11 @@ export function RecommendationCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {recommendation ? (
+        {isDataInsufficient ? (
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Create your first campaign to unlock AI-powered recommendations.
+          </p>
+        ) : recommendation ? (
           <>
             <div className="grid gap-3 sm:grid-cols-3">
               <div>

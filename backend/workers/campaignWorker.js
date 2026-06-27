@@ -1,6 +1,6 @@
 require("dotenv").config();
 console.log(
-  "WORKER FILE LOADED"
+  "[WORKER] Worker File Loaded"
 );
 const axios =
   require("axios");
@@ -19,8 +19,7 @@ const worker =
     async (job) => {
 
       console.log(
-        "Processing Job:",
-        job.data
+        `[WORKER] Processing Job: ${job.id}`
       );
 
       const campaign =
@@ -41,9 +40,23 @@ const worker =
 
         });
 
+      if (campaign.channel === "TELEGRAM") {
+        if (!customer.telegramConnected || !customer.telegramChatId) {
+          console.log(`[TELEGRAM] Skipping customer ${customer.email} (not connected or missing chat ID)`);
+          await prisma.communicationLog.update({
+            where: {
+              id: job.data.logId,
+            },
+            data: {
+              status: "FAILED",
+            },
+          });
+          return;
+        }
+      }
+
       console.log(
-        "Sending Email To:",
-        customer.email
+        `[WORKER] Sending Campaign to: ${customer.email}`
       );
 
       await axios.post(
@@ -72,6 +85,9 @@ const worker =
 
             phone:
               customer.phone,
+
+            telegramChatId:
+              customer.telegramChatId,
 
           },
 
@@ -102,7 +118,7 @@ const worker =
       });
 
       console.log(
-        "Sent To Channel Service"
+        `[WORKER] Sent to Channel Service`
       );
 
     },
@@ -119,8 +135,7 @@ worker.on(
   (job) => {
 
     console.log(
-      "JOB COMPLETED",
-      job.id
+      "[WORKER] Worker Completed - Job " + job.id
     );
 
   }
@@ -130,13 +145,13 @@ worker.on(
   "failed",
   (job, err) => {
 
-    console.log(
-      "JOB FAILED",
+    console.error(
+      "[WORKER] Worker Job Failed - Job " + job.id + ":",
       err.message
     );
 
   }
 );
 console.log(
-  "Campaign Worker Started..."
+  "[WORKER] Worker Started"
 );

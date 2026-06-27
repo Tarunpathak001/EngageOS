@@ -9,7 +9,7 @@ const customerSchema = z.object({
   name: z.string().min(2, "Name is required"),
   email: z.string().email("Valid email required"),
   phone: z.string().optional(),
-  city: z.string().optional(),
+  city: z.string().min(1, "City is required"),
   totalSpend: z.number().min(0, "Must be 0 or greater"),
 });
 
@@ -66,6 +66,9 @@ export function CustomerForm({ onSubmit, isLoading }: CustomerFormProps) {
         <div className="space-y-2">
           <Label htmlFor="city">City</Label>
           <Input id="city" {...register("city")} />
+          {errors.city && (
+            <p className="text-xs text-destructive">{errors.city.message}</p>
+          )}
         </div>
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="totalSpend">Total Spend (₹)</Label>

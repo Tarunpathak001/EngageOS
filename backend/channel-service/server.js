@@ -19,6 +19,6 @@ const PORT =
 
 app.listen(PORT, () => {
   console.log(
-    `Channel Service Running On Port ${PORT}`
+    `[SERVER] Channel Service Running On Port ${PORT}`
   );
 });

@@ -232,31 +232,46 @@ sequenceDiagram
 ```
 
 #### B. Campaign Dispatching & Tracking (Asynchronous Phase)
-This diagram represents the background queue worker processing each campaign task and sending messages via the Channel Service, followed by webhooks/pixel redirects that track customer clicks and opens.
+This diagram represents the background queue worker processing each campaign task. For Telegram campaigns, it validates connection state. For Email campaigns, it injects tracking assets and processes user telemetry:
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant Redis as Redis Queue (BullMQ)
     participant Worker as Campaign Worker
+    participant DB as PostgreSQL Database
     participant Channel as Channel Service (Port 6000)
     actor Cust as End Customer
     participant Backend as Core CRM Backend (Port 5000)
-    participant DB as PostgreSQL Database
 
     Note over Worker, Redis: Asynchronous Sending Process
     Worker->>Redis: Pick up next sending task
-    Worker->>Channel: Send data (customer details + message)
-    Channel->>Cust: Send Email with tracking pixel and CTA link
-    Channel->>Backend: Send receipt webhook (Set status to "DELIVERED")
-    Backend->>DB: Update database log to "DELIVERED"
-    
-    Note over Cust, Backend: Tracking Opens & Clicks
-    Cust->>Backend: Opens email (loads hidden 1x1 image /tracking/open/:id)
-    Backend->>DB: Update database log to "OPENED"
-    Cust->>Backend: Clicks email link (/tracking/click/:id)
-    Backend->>DB: Update database log to "CLICKED"
-    Backend-->>Cust: Redirect customer to store website
+    Worker->>DB: Fetch customer details & status
+
+    alt Channel is TELEGRAM
+        Worker->>Worker: Check if telegramConnected & telegramChatId exist
+        alt Customer is Connected
+            Worker->>Channel: POST /channel/send (chatId, message)
+            Channel->>Cust: Dispatch message via Telegram Bot API
+            Channel->>Backend: Delivery callback (Set status to "SENT")
+            Backend->>DB: Update database log to "SENT"
+        else Customer is NOT Connected
+            Worker->>DB: Skip and set Log status to "FAILED"
+            Note over Worker: Log skipped customer event
+        end
+    else Channel is EMAIL
+        Worker->>Channel: POST /channel/send (email details + message)
+        Channel->>Cust: Send Email with tracking pixel and CTA link
+        Channel->>Backend: Send receipt webhook (Set status to "DELIVERED")
+        Backend->>DB: Update database log to "DELIVERED"
+        
+        Note over Cust, Backend: Tracking Email Opens & Clicks
+        Cust->>Backend: Opens email (loads hidden 1x1 image /tracking/open/:id)
+        Backend->>DB: Update database log to "OPENED"
+        Cust->>Backend: Clicks email link (/tracking/click/:id)
+        Backend->>DB: Update database log to "CLICKED"
+        Backend-->>Cust: Redirect customer to store website
+    end
 ```
 
 ### 2. Frontend Authentication & Client Session Lifecycle

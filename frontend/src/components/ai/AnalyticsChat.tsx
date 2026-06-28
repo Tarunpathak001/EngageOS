@@ -45,7 +45,9 @@ export function AnalyticsChat({ onAsk, isLoading }: AnalyticsChatProps) {
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: recommendation.reason,
+        content:
+          recommendation.reason ??
+          "No recommendation available.",
         recommendation,
       };
       setMessages((prev) => [...prev, assistantMessage]);
@@ -99,11 +101,10 @@ export function AnalyticsChat({ onAsk, isLoading }: AnalyticsChatProps) {
                   </div>
                 )}
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-3 text-sm ${
-                    msg.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-foreground"
-                  }`}
+                  className={`max-w-[80%] rounded-lg px-4 py-3 text-sm ${msg.role === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-foreground"
+                    }`}
                 >
                   <p>{msg.content}</p>
                   {msg.recommendation && (

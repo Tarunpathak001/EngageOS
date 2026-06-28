@@ -103,7 +103,7 @@ const sendBotMessage = async (chatId, text) => {
 };
 
 const linkTelegramAccount = async (chatId, username, token) => {
-  const customer = await prisma.customer.findUnique({
+  const customer = await prisma.customer.findFirst({
     where: { telegramInviteToken: token },
   });
 
@@ -192,7 +192,7 @@ const handleTelegramUpdate = async (update) => {
         await sendBotMessage(chatId, "Welcome to EngageOS Bot! To link your CRM customer profile, please click the 'Connect Telegram' button on your CRM customer detail page.");
       }
     } else if (command === "/help") {
-      await sendBotMessage(chatId, 
+      await sendBotMessage(chatId,
         "EngageOS Bot Commands:\n" +
         "/start <token> - Link your CRM profile\n" +
         "/status - Check connection status\n" +

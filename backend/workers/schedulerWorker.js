@@ -2,18 +2,27 @@ const express = require("express");
 
 const app = express();
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 10001;
 
 app.get("/", (req, res) => {
   res.json({
-    service: "EngageOS Campaign Worker",
+    service: "EngageOS Scheduler",
     status: "Healthy",
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`[WORKER] Health server running on port ${PORT}`);
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
 });
+
+app.listen(PORT, () => {
+  console.log(`[SCHEDULER] Health server running on port ${PORT}`);
+});
+
 
 const prisma =
   require("../prisma/prismaClient");

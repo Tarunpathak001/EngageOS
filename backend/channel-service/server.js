@@ -22,3 +22,11 @@ app.listen(PORT, () => {
     `[SERVER] Channel Service Running On Port ${PORT}`
   );
 });
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    service: "EngageOS Channel Service",
+    status: "Healthy",
+    version: "1.0.0",
+  });
+});

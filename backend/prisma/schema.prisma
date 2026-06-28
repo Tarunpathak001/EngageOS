@@ -21,7 +21,7 @@ model Customer {
   telegramUsername        String?
   telegramConnected       Boolean            @default(false)
   telegramConnectedAt     DateTime?
-  telegramInviteToken     String?            @unique
+  telegramInviteToken     String?
   telegramInviteExpiresAt DateTime?
 }
 
